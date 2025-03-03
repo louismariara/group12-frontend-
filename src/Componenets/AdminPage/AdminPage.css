@@ -1,0 +1,86 @@
+
+.admin-page{
+    min-height:88.2vh;
+    background: linear-gradient(#f6f8fa, #113768);
+    background-attachment:fixed;
+}
+
+
+
+/* Main container for the Admin Page */
+.admin-container {
+    max-width: 800px;
+    margin: 0.1rem auto;
+    background:hsl(210, 44.40%, 89.40%);
+    padding: 3rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Title styling */
+  .admin-title {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    text-align: center;
+    color: #333;
+  }
+  
+  /* Welcome text styling */
+  .admin-p {
+    font-size: 2rem;
+    color: #555;
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  
+  /* Highlight the username */
+  .admin-p span {
+    font-weight: bold;
+    color: #000;
+  }
+  
+  /* Container for instructor/learner stats */
+  .stats-container {
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+  }
+  
+  /* Individual card for stats */
+  .stats-card {
+    flex: 1;
+    max-width: 200px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 1rem 1.5rem;
+    text-align: center;
+    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Card title (Instructors, Learners) */
+  .stats-card h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    color: #333;
+  }
+  
+  /* Stats count (the number of instructors/learners) */
+  .stats-count {
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 0;
+    color:rgb(12, 81, 155); /* Customize this color as you wish */
+  }
+  
+  /* Responsive Design: stack cards on smaller screens */
+  @media (max-width: 600px) {
+    .stats-container {
+      flex-direction: column;
+      align-items: center;
+    }
+    .stats-card {
+      max-width: 100%;
+      margin-bottom: 1rem;
+    }
+}
