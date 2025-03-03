@@ -1,0 +1,55 @@
+/* Grades.css */
+
+.grades-page{
+    min-height:88vh;
+    background: linear-gradient(#f6f8fa, #113768);
+    background-attachment:fixed;
+}
+.grades-container {
+    max-width: 700px;
+    margin: 2px auto;
+    padding: 60px;
+    background:rgb(236, 243, 248);
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    text-align: center;
+  }
+  
+  .grades-title {
+    font-size: 28px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 20px;
+  }
+  
+  .grades-list {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .grade-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background: #f9f9f9;
+    transition: background 0.3s ease;
+  }
+  
+  .grade-item:hover {
+    background: #f1f1f1;
+  }
+  
+  .course-name {
+    font-size: 18px;
+    color: #555;
+  }
+  
+  .grade-value {
+    font-size: 20px;
+    font-weight: bold;
+    color:rgb(28, 156, 24); /* Green color for positive feeling */
+  }

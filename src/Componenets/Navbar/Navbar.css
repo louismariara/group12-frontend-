@@ -1,0 +1,105 @@
+/* Navbar Styling */
+.navbar {
+    background-color: #1e1e1e;  /* Bright blue background for the navbar */
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;  /* This distributes space between elements */
+    align-items: center;
+    width: 100%;
+  }
+  
+  .navbar-left {
+    flex: 1;
+  }
+  
+  .navbar-title {
+    font-size: 2rem;
+    color: white;
+    margin-left:200px;
+    margin-top: 20px;
+    
+  }
+  
+  .navbar-links {
+    list-style-type: none;
+    display: flex;
+    margin: 0;
+    padding: 0;
+    justify-content: center;  /* This centers the links horizontally */
+    flex: 2;
+    align-items: center;  /* Ensures that the links are vertically aligned */
+  }
+  
+  .navbar-link {
+    text-decoration: none;
+    color: white;
+    margin:0 15px;
+    font-size: 1.1rem;  /* You can change this size, but consistency is key */
+    display: inline-flex;  /* Makes sure links don't break the layout */
+    align-items: center;  /* Ensures that links are vertically aligned */
+    line-height: 1.5;  /* Makes sure that the links have a consistent vertical height */
+   
+  }
+  
+  .navbar-link:hover {
+    text-decoration: underline;
+    color: #01579b;
+  }
+  
+ 
+  
+  .navbar-btn {
+    background-color: #01579b;  /* Darker blue for the buttons */
+    color: white;
+    border: none;
+    padding: 9px 20px;
+    font-size: 1.1rem;  /* You can change this size too, but consistency is key */
+    border-radius: 66px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    display: inline-flex;  /* Ensures buttons are inline and do not cause alignment issues */
+    align-items: center;  /* Ensures the button text is aligned properly */
+    line-height: 1.5;  /* Consistent line-height for buttons */
+    gap: 5px;
+    justify-content: flex-end;
+    font-weight: bold;
+    
+  }
+  
+  .navbar-btn:hover {
+    background-color: #0277bd;  /* Slightly lighter blue on hover */
+  }
+  
+  .navbar-btn:focus {
+    outline: none;
+  }
+  
+  .navbar-btn:disabled {
+    background-color: #b3e5fc;
+    cursor: not-allowed;
+  }
+  
+  /* Add responsive styles for smaller screens */
+  @media (max-width: 768px) {
+    .navbar {
+      flex-direction: row;
+      justify-content: space-between;
+    }
+  
+    .navbar-left, .navbar-links, .navbar-btn {
+      flex: 1;
+    }
+  
+    .navbar-links {
+      justify-content: center;
+    }
+  
+    .navbar-btn {
+      justify-content: flex-end;
+    }
+  
+    .navbar-title {
+      text-align: left;
+    }
+  }
+  

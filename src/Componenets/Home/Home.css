@@ -1,0 +1,124 @@
+/* Home.css */
+
+/* Home container styles */
+.home-container{
+    display:flex;
+    justify-content: flex-end;
+    align-items:center;
+    overflow:hidden;
+    background: linear-gradient(rgb(245, 246, 253),rgb(154, 195, 248));
+    background-color:#dce9fc;
+    min-height: 88.2vh; /* Ensure the container takes full height of the viewport */
+    
+}
+  
+  /* Content container styles */
+  .home-content {
+    width: 50%; /* Content takes 45% of the width */
+  }
+  
+  /* Styling for the heading */
+  .home-h1 {
+    font-size: 3.5rem;
+    font-weight: bold;
+    margin-bottom:10px;
+    color:black;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4); /* Adds a shadow for better contrast */
+  }
+  
+  /* Styling for the paragraph */
+  .home-p{
+    font-size: 1.5rem;
+    color:rgb(66, 64, 64);
+    margin-bottom: 10px;
+    line-height: 1.5;
+    margin-left:10%;
+
+  }
+
+  .explore-link {
+    text-decoration: none;
+    color: white;
+    margin:0 15px;
+    font-size: 1.1rem;  /* You can change this size, but consistency is key */
+    display: inline-flex;  /* Makes sure links don't break the layout */
+    align-items: center;  /* Ensures that links are vertically aligned */
+    line-height: 1.5;  /* Makes sure that the links have a consistent vertical height */
+   
+  }
+  
+  .explore-link:hover {
+    text-decoration: underline;
+    color: #01579b;
+  }
+  
+  .explore-btn {
+    background-color: #01579b;  /* Darker blue for the buttons */
+    color: white;
+    border: none;
+    padding: 9px 20px;
+    font-size: 1.1rem;  /* You can change this size too, but consistency is key */
+    border-radius: 66px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    display: inline-flex;  /* Ensures buttons are inline and do not cause alignment issues */
+    align-items: center;  /* Ensures the button text is aligned properly */
+    line-height: 1.5;  /* Consistent line-height for buttons */
+    gap: 5px;
+    justify-content: flex-end;
+    font-weight: bold;
+    margin-left:260px;
+    
+  }
+  
+  .explore-btn:hover {
+    background-color:#deebf3;  /* Slightly lighter blue on hover */
+  }
+  
+  .explore-btn:focus {
+    outline: none;
+  }
+  
+ 
+  
+  
+  
+  /* Styling for the image */
+  .home-logo {
+    width: 50%; /* Image takes 50% of the width */
+    height: auto;
+    object-fit: cover;
+    border-radius: 10px; /* Optional: adds rounded corners to the image */
+    margin-left:50px;
+    margin-right:200px;
+    display:block;
+    
+
+  }
+  
+  /* Optional: Add responsive styling */
+  @media (max-width: 600px) {
+    .home-container{
+        flex-direction: column; /* Stack the content on smaller screens */
+        text-align: center;
+        
+      }
+  
+    .home-content {
+      width: 100%; /* Take full width on mobile */
+    
+    }
+  
+    }
+  
+    .home-description {
+      font-size: 1.125rem; /* Adjust paragraph font size for smaller screens */
+    }
+  
+    
+    .home-logo {
+      width: 80%; /* Make the image fill the screen width on mobile */
+       
+      margin-top:0 auto; /* Add some space between the text and the image on smaller screens */
+    }
+  
