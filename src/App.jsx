@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Home from "./Componenets/Home/Home";
-import Navbar from "./Componenets/Navbar/Navbar";
-import Login from "./Componenets/Login/Login";
-import Signup from "./Componenets/signup/Signup";
-import Grades from "./Componenets/Grades/Grades";
-import Courses from "./Componenets/Courses/Courses";
-import AdminPage from "./Componenets/AdminPage/AdminPage";
-import CourseDetails from "./Componenets/CourseDetails/CourseDetails";
+import Home from "./Components/Home/Home";
+import Navbar from "./Components/Navbar/Navbar";
+import Login from "./Components/Login/Login";
+import Signup from "./Components/signup/Signup";
+import Grades from "./Components/Grades/Grades";
+import Courses from "./Components/Courses/Courses";
+import AdminPage from "./Components/AdminPage/AdminPage";
+import CourseDetails from "./Components/CourseDetails/CourseDetails";
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -29,7 +29,7 @@ const App = () => {
         <Route path="/courses" element={<Courses />} />
         <Route path="/admin" element={<AdminPage />} />
         <Route path="/grades" element={<Grades />} />
-        <Route path="/courses/:id" element={<CourseDetails />} />
+        <Route path="/course/:id" element={<CourseDetails />} />
       </Routes>
     </Router>
   );

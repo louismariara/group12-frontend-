@@ -1,4 +1,4 @@
-import { Links } from "react-router-dom";
+import { Link } from "react-router-dom";
 import React, { useState } from "react";
 
 import './Courses.css';
@@ -11,13 +11,7 @@ import course6 from '../../assets/algor.png';
 import course7 from '../../assets/ccc.jpg';
 import course8 from '../../assets/iuu.jpg'
 
-
-
-
-
-const Courses = () => {
-  const user = JSON.parse(localStorage.getItem("user"));
-  const [courses, setCourses] = useState([
+ const initialcourses = [
     { id: 1, title: "React Basics", description: "Learn React from scratch", image: course1 },
     { id: 2, title: "Advanced JavaScript", description: "Deep dive into JS", image: course2 },
     { id: 3, title: "Node.js Fundamentals", description: "Backend with Node.js", image: course3 },
@@ -26,7 +20,14 @@ const Courses = () => {
     { id: 6, title: "Algorithms", description: "Algorithm design and analysis",image: course6 },
     { id: 7, title: "Advanced C++ Course", description: "master memory management,templates and concurrency",image: course7 },
     { id: 8, title: "UI/UX Design", description: "Design beautiful and user-friendly interfaces",image: course8 }
-  ]);
+  
+];
+
+
+
+const Courses = () => {
+  const user = JSON.parse(localStorage.getItem("user"));
+  const [courses, setCourses] = useState(initialcourses);
 
   const handleAddCourse = () => {
     const newCourse = { id: Date.now(), title: "New Course", description: "Course description" };
@@ -55,7 +56,13 @@ const Courses = () => {
 
             <p className="course-description">{course.description}</p>
 
-            <button className="view-course-btn">View Course</button>
+            
+           <button className="view-course-btn">
+           <Link to={`/course/${course.id}`}>
+            View Course
+            </Link>
+            </button>
+            
 
             {user && (user.role === "admin" || user.role === "instructor") && (
 

@@ -1,0 +1,140 @@
+.course-box{
+  
+}
+
+
+.course-details {
+    width: 70%;
+    margin: auto;
+    font-family: 'Arial', sans-serif;
+    color: #333;
+    margin-left:10px;
+    
+  }
+  
+  .course-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .course-info h2 {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 6px;
+  }
+  
+  .course-info p {
+    font-size: 16px;
+    color: #555;
+  }
+  
+  .courses-image {
+    width: 600px;
+    height: auto;
+    border-radius: 8px;
+    margin-top:20px;
+    
+  }
+  
+  /* Course Structure */
+  .course-box{
+    margin-right:300px;
+    
+    
+  }
+  .section-title {
+    font-size: 22px;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  
+  .course-structure {
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 8px;
+    
+    
+  }
+  
+  .module {
+    background: white;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    overflow: hidden;
+    
+  }
+  
+  .module-title {
+    font-size: 18px;
+    font-weight: bold;
+    padding: 10px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f1f1f1;
+    border-radius: 5px;
+  }
+  
+  .module-title:hover {
+    background:rgb(87, 86, 86);
+    color:white;
+  }
+  
+  .expanded {
+    background:rgb(75, 94, 116);
+    color: white;
+  }
+  
+  /* Lectures */
+  .lectures {
+    padding: 10px;
+  }
+  
+  .lecture {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 20px;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .lecture:last-child {
+    border-bottom: none;
+  }
+  
+  .lecture-title {
+    font-size: 16px;
+  }
+  
+  .lecture-duration {
+    color: #888;
+    font-size: 14px;
+  }
+  
+  .watch-link {
+    color:rgb(59, 108, 160);
+    text-decoration: none;
+    font-weight: bold;
+  }
+  
+  .watch-link:hover {
+    text-decoration: underline;
+  }
+  
+  /* Rating Section */
+  .rating {
+    margin-top: 20px;
+  }
+  
+  .rating h4 {
+    font-size: 18px;
+    margin-bottom: 5px;
+  }
+  
+  .rating-stars {
+    color: #f4c430;
+    font-size: 22px;
+  }
