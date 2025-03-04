@@ -8,9 +8,21 @@ import Grades from "./Components/Grades/Grades";
 import Courses from "./Components/Courses/Courses";
 import AdminPage from "./Components/AdminPage/AdminPage";
 import CourseDetails from "./Components/CourseDetails/CourseDetails";
+import MyCourses from "./Components/MyCourses/MyCourses";
+
+
+
+
+
+
+
 
 const App = () => {
   const [user, setUser] = useState(null);
+
+  const updateCourse = (id, updatedCourse) => {
+    setCourses(courses.map(course => (course.id.toString() === id ? { ...course, ...updatedCourse } : course)));
+  };
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
@@ -30,6 +42,9 @@ const App = () => {
         <Route path="/admin" element={<AdminPage />} />
         <Route path="/grades" element={<Grades />} />
         <Route path="/course/:id" element={<CourseDetails />} />
+        <Route path="/my-courses" element={<MyCourses />} />
+      
+        
       </Routes>
     </Router>
   );

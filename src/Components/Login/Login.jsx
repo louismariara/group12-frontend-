@@ -73,7 +73,7 @@ const Login = ({ setUser }) => {
            className="role-select"
         >
         
-          <option value="learner">Learner</option>
+          <option value="learner">Student</option>
           <option value="instructor">Instructor</option>
           <option value="admin">Admin</option>
         </select>

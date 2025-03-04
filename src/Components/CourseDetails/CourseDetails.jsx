@@ -2,6 +2,9 @@ import { useParams } from "react-router-dom";
 import { useState } from "react";
 import './CourseDetails.css';
 
+
+
+
 //import images
 import course1 from '../../assets/react.jpg';
 import course2 from'../../assets/javascript.jpg';
@@ -98,8 +101,8 @@ const courses = [
     image: course7, 
     modules: [
       { title: "Memory Management", lectures: [
-          { title: "Pointers and References", duration: "12 minutes", video: "/videos/cpp1.mp4" },
-          { title: "Dynamic Allocation", duration: "14 minutes", video: "/videos/cpp2.mp4" }
+          { title: "Pointers and References", duration: "8 minutes", video: "https://www.youtube.com/embed/sxHng1iufQE?si=sbDjbTR-r08ttZl7" },
+          { title: "Dynamic Allocation", duration: "19 minutes", video:"https://www.youtube.com/embed/27QLVnn74Eg?si=kUMJI0GFelI36FJs"  },
       ]},
       
     ]
@@ -111,8 +114,8 @@ const courses = [
     image: course8, 
     modules: [
       { title: "UI Principles", lectures: [
-          { title: "Color Theory & Typography", duration: "12 minutes", video: "/videos/ui1.mp4" },
-          { title: "Designing for Accessibility", duration: "14 minutes", video: "/videos/ui2.mp4" }
+          { title: "Color Theory & Typography", duration: "10 minutes", video: "https://www.youtube.com/embed/GCluIaNmOG0?si=inIdf12-Ng_95Bwi" },
+         
       ]},
       
     ]
@@ -121,9 +124,15 @@ const courses = [
 
 const CourseDetails = () => {
   const { id } = useParams();
-  const course = courses.find((course) => course.id === parseInt(id));
+  const course = courses.find((course) => course.id=== parseInt(id));
   const [expandedModule, setExpandedModule] = useState(null);
   const [selectedVideo, setSelectedVideo] = useState(null); // Track the selected video
+
+
+
+
+
+
 
   if (!course) {
     return <h2>Course not found</h2>;
@@ -134,8 +143,9 @@ const CourseDetails = () => {
       <div className="course-details">
           <div className="course-header">
               <div className="course-info">
-                  <h2>{course.title}</h2>
-                  <p>{course.description}</p>
+              <h2>{course.title}</h2>
+              <p>{course.description}</p>
+                  
               </div>
           </div>
 
@@ -161,6 +171,8 @@ const CourseDetails = () => {
                   <img src={course.image} alt={course.title} className="courses-image" />
               )}
           </div>
+
+          
 
           {/* Course Structure */}
           <div className="course-box">
@@ -200,7 +212,13 @@ const CourseDetails = () => {
           </div>
       </div>
       </div>
-  );
+  
+
+
+  
+    );
 };
+  
+
 
 export default CourseDetails;
