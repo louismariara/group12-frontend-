@@ -11,7 +11,7 @@ import course6 from '../../assets/algor.png';
 import course7 from '../../assets/ccc.jpg';
 import course8 from '../../assets/iuu.jpg'
 
- const initialcourses = [
+ const initialCourses = [
     { id: 1, title: "React Basics", description: "Learn React from scratch", image: course1 },
     { id: 2, title: "Advanced JavaScript", description: "Deep dive into JS", image: course2 },
     { id: 3, title: "Node.js Fundamentals", description: "Backend with Node.js", image: course3 },
@@ -27,26 +27,29 @@ import course8 from '../../assets/iuu.jpg'
 
 const Courses = () => {
   const user = JSON.parse(localStorage.getItem("user"));
-  const [courses, setCourses] = useState(initialcourses);
+
+ const [courses, setCourses]=useState(initialCourses)
 
   const handleAddCourse = () => {
     const newCourse = { id: Date.now(), title: "New Course", description: "Course description" };
     setCourses([...courses, newCourse]);
+    
+  
   };
 
   const handleDeleteCourse = (id) => {
     setCourses(courses.filter(course => course.id !== id));
   };
-
+  
   return (
+
     <div className="courses-container">
       <h1 className="title"> Our Courses</h1>
-      {user && user.role === "admin" && (
-        <button className="add-course-btn" onClick={handleAddCourse}>Add Course</button>
-      )}
-
+      
+      
     <ul className="course-list">
         {courses.map((course) => (
+
           <li key={course.id}  className="course-card">
 
             <img src={course.image} alt={course.title} className="course-image" />
