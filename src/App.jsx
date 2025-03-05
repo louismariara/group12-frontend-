@@ -9,26 +9,38 @@ import Courses from "./Components/Courses/Courses";
 import AdminPage from "./Components/AdminPage/AdminPage";
 import CourseDetails from "./Components/CourseDetails/CourseDetails";
 import MyCourses from "./Components/MyCourses/MyCourses";
+import AddCourses from "./Components/AddCourses/AddCourses";
 
 
-
-
-
-
-
+// IMPORTANT: import your AddCourse component
 
 const App = () => {
-  const [user, setUser] = useState(null);
+  // 1) Store logged-in user (from localStorage or wherever)
+  const [user, setUser] = useState(() => {
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    return storedUser || null;
+  });
 
-  const updateCourse = (id, updatedCourse) => {
-    setCourses(courses.map(course => (course.id.toString() === id ? { ...course, ...updatedCourse } : course)));
-  };
+  // 2) Store courses in state
+  const [courses, setCourses] = useState([
+    // Optional: add a sample course or leave empty
+    // {
+    //   id: 1,
+    //   title: "Intro to Cybersecurity",
+    //   description: "Basics of cybersecurity.",
+    //   image: "/images/cyber.jpg",
+    //   earnings: 100,
+    //   students: 50,
+    //   publishedDate: "03/08/2025",
+    // },
+  ]);
+const AddCourse =(newCourse)=>{
+  setCourses([...courses, newCourse]);
+};
 
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem("user"));
-    if (storedUser) {
-      setUser(storedUser);
-    }
+    // If you need to fetch user/courses from an API, do it here
+    // setUser(...), setCourses(...)
   }, []);
 
   return (
@@ -38,11 +50,12 @@ const App = () => {
         <Route path="/" element={<Home />} /> 
         <Route path="/Login" element={<Login setUser={setUser} />} />
         <Route path="/signup" element={<Signup setUser={setUser} />} />
-        <Route path="/courses" element={<Courses />} />
+        <Route path="/courses" element={<Courses  courses={courses} />} />
         <Route path="/admin" element={<AdminPage />} />
         <Route path="/grades" element={<Grades />} />
         <Route path="/course/:id" element={<CourseDetails />} />
-        <Route path="/my-courses" element={<MyCourses />} />
+        <Route path="/my-courses" element={<MyCourses courses={courses}  />} />
+        <Route path="/add-courses" element={<AddCourses courses={courses} setCourses={setCourses}/>} />
       
         
       </Routes>
