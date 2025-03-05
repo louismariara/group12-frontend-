@@ -1,54 +1,139 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./AdminPage.css"; // <-- Import the CSS file
+import "./AdminPage.css";
 
 const AdminPage = () => {
   const [instructorCount, setInstructorCount] = useState(0);
-  const [learnerCount, setLearnerCount] = useState(0);
+  const [studentCount, setStudentCount] = useState(0);
+  const [instructors, setInstructors] = useState([]);
+  const [students, setStudents] = useState([]);
+  const [grades, setGrades] = useState([]);
+  const [showInstructors, setShowInstructors] = useState(false);
+  const [showStudents, setShowStudents] = useState(false);
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user"));
 
   useEffect(() => {
-    // Redirect non-admins to the home page
     if (!user || user.role !== "admin") {
       navigate("/");
+      return;
     }
 
-    // Retrieve all logged-in users
-    const loggedInUsers = JSON.parse(localStorage.getItem("loggedInUsers")) || [];
+    const token = localStorage.getItem("token");
+    // Fetch users
+    fetch("http://localhost:5000/api/admin/users", {
+      headers: { "Authorization": `Bearer ${token}` }
+    })
+      .then(res => res.json())
+      .then(data => {
+        const instructorsList = data.filter(u => u.role === "instructor");
+        const studentsList = data.filter(u => u.role === "student");
+        setInstructors(instructorsList);
+        setStudents(studentsList);
+        setInstructorCount(instructorsList.length);
+        setStudentCount(studentsList.length);
+      })
+      .catch(err => console.error("Error fetching users:", err));
 
-    // Count instructors and learners
-    const instructors = loggedInUsers.filter((u) => u.role === "instructor").length;
-    const learners = loggedInUsers.filter((u) => u.role === "learner").length;
-
-    setInstructorCount(instructors);
-    setLearnerCount(learners);
+    // Fetch grades
+    fetch("http://localhost:5000/api/admin/grades", {
+      headers: { "Authorization": `Bearer ${token}` }
+    })
+      .then(res => res.json())
+      .then(data => setGrades(data))
+      .catch(err => console.error("Error fetching grades:", err));
   }, [navigate, user]);
 
-  // If user is not an admin, render nothing
-  if (!user || user.role !== "admin") {
-    return null;
-  }
+  const approveInstructor = (userId) => {
+    const token = localStorage.getItem("token");
+    fetch(`http://localhost:5000/api/admin/users/${userId}/approve-instructor`, {
+      method: "PUT",
+      headers: { "Authorization": `Bearer ${token}` }
+    })
+      .then(res => res.json())
+      .then(data => {
+        alert(data.message);
+        // Refresh instructors list
+        fetch("http://localhost:5000/api/admin/users", {
+          headers: { "Authorization": `Bearer ${token}` }
+        })
+          .then(res => res.json())
+          .then(data => {
+            const instructorsList = data.filter(u => u.role === "instructor");
+            setInstructors(instructorsList);
+            setInstructorCount(instructorsList.length);
+          });
+      })
+      .catch(err => console.error("Error approving instructor:", err));
+  };
+
+  if (!user || user.role !== "admin") return null;
 
   return (
     <div className="admin-page">
-    <div className="admin-container">
-      <h1 className="admin-title">Admin Dashboard</h1>
-      <p className="admin-p">
-        Welcome, <span>{user?.username}</span>. You can manage content here.
-      </p>
+      <div className="admin-container">
+        <h1 className="admin-title">Admin Dashboard</h1>
+        <p className="admin-p">
+          Welcome, <span>{user?.username}</span>. Manage content here.
+        </p>
 
-      <div className="stats-container">
-        <div className="stats-card">
-          <h3>Instructors</h3>
-          <p className="stats-count">{instructorCount}</p>
+        <div className="stats-container">
+          <div
+            className="stats-card"
+            onClick={() => setShowInstructors(!showInstructors)}
+          >
+            <h3>Instructors</h3>
+            <p className="stats-count">{instructorCount}</p>
+          </div>
+          <div
+            className="stats-card"
+            onClick={() => setShowStudents(!showStudents)}
+          >
+            <h3>Students</h3>
+            <p className="stats-count">{studentCount}</p>
+          </div>
         </div>
-        <div className="stats-card">
-          <h3>Learners</h3>
-          <p className="stats-count">{learnerCount}</p>
+
+        {showInstructors && (
+          <div>
+            <h3>Instructors List</h3>
+            <ul>
+              {instructors.map((i) => (
+                <li key={i.id}>
+                  {i.username} ({i.email})
+                  {i.is_instructor && !i.is_instructor_verified && (
+                    <button onClick={() => approveInstructor(i.id)}>
+                      Approve as Instructor
+                    </button>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {showStudents && (
+          <div>
+            <h3>Students List</h3>
+            <ul>
+              {students.map((s) => (
+                <li key={s.id}>{s.username} ({s.email})</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <div>
+          <h3>All Grades</h3>
+          <ul>
+            {grades.map((g) => (
+              <li key={g.id}>
+                Student ID: {g.student_id}, Course: {g.course?.name || g.course_id}, Grade: {g.grade}
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
-    </div>
     </div>
   );
 };

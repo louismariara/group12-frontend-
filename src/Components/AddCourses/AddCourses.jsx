@@ -1,45 +1,32 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./AddCourses.css"; // For styling
+import "./AddCourses.css";
 
-const AddCourse = ({ courses, setCourses }) => {
+const AddCourse = () => {
   const navigate = useNavigate();
-
-  // Course fields
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  
   const [thumbnailFile, setThumbnailFile] = useState(null);
-
-  // Lecture modal
   const [lectures, setLectures] = useState([]);
   const [showLectureModal, setShowLectureModal] = useState(false);
-
-  // Fields for a single lecture
   const [lectureTitle, setLectureTitle] = useState("");
   const [lectureDuration, setLectureDuration] = useState("");
   const [lectureUrl, setLectureUrl] = useState("");
   const [lecturePreviewFree, setLecturePreviewFree] = useState(false);
-
-  // Success notification
   const [showSuccess, setShowSuccess] = useState(false);
 
-  // Add Lecture
   const handleAddLecture = () => {
     if (!lectureTitle || !lectureDuration || !lectureUrl) {
       alert("Please fill in all required lecture fields!");
       return;
     }
     const newLecture = {
-      id: lectures.length + 1,
       title: lectureTitle,
       duration: lectureDuration,
-      url: lectureUrl,
+      video: lectureUrl,
       previewFree: lecturePreviewFree,
     };
     setLectures([...lectures, newLecture]);
-
-    // Clear modal fields
     setLectureTitle("");
     setLectureDuration("");
     setLectureUrl("");
@@ -47,55 +34,50 @@ const AddCourse = ({ courses, setCourses }) => {
     setShowLectureModal(false);
   };
 
-  // Delete a single lecture
-  const handleDeleteLecture = (lectureId) => {
-    setLectures(lectures.filter((lec) => lec.id !== lectureId));
+  const handleDeleteLecture = (index) => {
+    setLectures(lectures.filter((_, i) => i !== index));
   };
 
-  // Final Add (publish) course
   const handleAddCourse = () => {
-    if (!title || !description) {
-      alert("Please fill in course title and description!");
+    if (!title) {
+      alert("Please fill in course title!");
       return;
     }
-    // Build the new course object
-    const newCourse = {
-      id: courses.length + 1,
-      title,
-      description,
-     
-      image: thumbnailFile
-        ? URL.createObjectURL(thumbnailFile)
-        : "/images/default.png",
-      lectures,
-     students:1,
-      publishedDate: new Date().toLocaleDateString(),
+    const courseData = {
+      name: title,
+      duration: 4, // Add a field if you want this dynamic
+      image: thumbnailFile ? URL.createObjectURL(thumbnailFile) : null,
+      modules: lectures.length > 0 ? [{ title: "Module 1", lectures }] : null
     };
 
-    // Update global courses
-    setCourses([...courses, newCourse]);
-
-    // Show success notification
-    setShowSuccess(true);
-
-    // Hide notification after 2 seconds and navigate to /courses
-    setTimeout(() => {
-      setShowSuccess(false);
-      navigate("/courses");
-    }, 2000);
+    const token = localStorage.getItem("token");
+    fetch("http://localhost:5000/api/admin/courses", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify(courseData)
+    })
+      .then(res => res.json())
+      .then(() => {
+        setShowSuccess(true);
+        setTimeout(() => {
+          setShowSuccess(false);
+          navigate("/courses");
+        }, 2000);
+      })
+      .catch(err => console.error("Error adding course:", err));
   };
 
   return (
     <div className="add-course-container">
-      {/* Success Notification */}
       {showSuccess && (
         <div className="success-notification">
           <span>Course Added</span>
         </div>
       )}
-
       <h2>Add Course</h2>
-
       <div className="input-group">
         <label>Course Title</label>
         <input
@@ -105,7 +87,6 @@ const AddCourse = ({ courses, setCourses }) => {
           onChange={(e) => setTitle(e.target.value)}
         />
       </div>
-
       <div className="input-group">
         <label>Course Description</label>
         <textarea
@@ -114,9 +95,6 @@ const AddCourse = ({ courses, setCourses }) => {
           onChange={(e) => setDescription(e.target.value)}
         />
       </div>
-
-      
-
       <div className="input-group">
         <label>Course Thumbnail</label>
         <input
@@ -124,26 +102,24 @@ const AddCourse = ({ courses, setCourses }) => {
           onChange={(e) => setThumbnailFile(e.target.files[0])}
         />
       </div>
-
-      {/* Lectures Section */}
       <div className="lecture-section">
         <h3>Lectures</h3>
         {lectures.length > 0 ? (
           <ul className="lecture-list">
-            {lectures.map((lecture) => (
-              <li key={lecture.id}>
+            {lectures.map((lecture, index) => (
+              <li key={index}>
                 <div className="lecture-item">
                   <div>
-                    <strong>{lecture.title}</strong> ({lecture.duration} minutes)
+                    <strong>{lecture.title}</strong> ({lecture.duration})
                     {lecture.previewFree && " [Preview Free]"}
                     <br />
-                    <small>{lecture.url}</small>
+                    <small>{lecture.video}</small>
                   </div>
                   <button
                     className="delete-lecture-btn"
-                    onClick={() => handleDeleteLecture(lecture.id)}
+                    onClick={() => handleDeleteLecture(index)}
                   >
-                    &times;
+                    ×
                   </button>
                 </div>
               </li>
@@ -159,13 +135,9 @@ const AddCourse = ({ courses, setCourses }) => {
           + Add Lecture
         </button>
       </div>
-
-      {/* Publish Course Button */}
       <button onClick={handleAddCourse} className="add-btn">
         ADD
       </button>
-
-      {/* Lecture Modal */}
       {showLectureModal && (
         <div className="lecture-modal">
           <div className="lecture-modal-content">
@@ -175,10 +147,9 @@ const AddCourse = ({ courses, setCourses }) => {
                 className="close-modal"
                 onClick={() => setShowLectureModal(false)}
               >
-                &times;
+                ×
               </button>
             </div>
-
             <div className="input-group">
               <label>Lecture Title</label>
               <input
@@ -188,9 +159,8 @@ const AddCourse = ({ courses, setCourses }) => {
                 onChange={(e) => setLectureTitle(e.target.value)}
               />
             </div>
-
             <div className="input-group">
-              <label>Duration (minutes)</label>
+              <label>Duration</label>
               <input
                 type="text"
                 placeholder="Enter lecture duration"
@@ -198,7 +168,6 @@ const AddCourse = ({ courses, setCourses }) => {
                 onChange={(e) => setLectureDuration(e.target.value)}
               />
             </div>
-
             <div className="input-group">
               <label>Lecture URL</label>
               <input
@@ -208,7 +177,6 @@ const AddCourse = ({ courses, setCourses }) => {
                 onChange={(e) => setLectureUrl(e.target.value)}
               />
             </div>
-
             <div className="input-group checkbox-group">
               <label>Preview Free?</label>
               <input
@@ -217,7 +185,6 @@ const AddCourse = ({ courses, setCourses }) => {
                 onChange={(e) => setLecturePreviewFree(e.target.checked)}
               />
             </div>
-
             <div className="modal-buttons">
               <button onClick={handleAddLecture} className="modal-add-btn">
                 Add

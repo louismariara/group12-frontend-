@@ -1,80 +1,80 @@
 import { Link } from "react-router-dom";
-import React, { useState } from "react";
-
+import React, { useState, useEffect } from "react";
 import './Courses.css';
-import course1 from '../../assets/react.jpg';
-import course2 from'../../assets/javascript.jpg';
-import course3 from'../../assets/node.jpg';
-import course4 from'../../assets/css.jpg';
-import course5 from '../../assets/python.jpg';
-import course6 from '../../assets/algor.png';
-import course7 from '../../assets/ccc.jpg';
-import course8 from '../../assets/iuu.jpg'
-
- const initialCourses = [
-    { id: 1, title: "React Basics", description: "Learn React from scratch", image: course1 },
-    { id: 2, title: "Advanced JavaScript", description: "Deep dive into JS", image: course2 },
-    { id: 3, title: "Node.js Fundamentals", description: "Backend with Node.js", image: course3 },
-    { id: 4, title: "CSS Mastery", description: "Advanced CSS techniques",image: course4 },
-    { id: 5, title: "python Programming", description: "learn python from the basics",image: course5},
-    { id: 6, title: "Algorithms", description: "Algorithm design and analysis",image: course6 },
-    { id: 7, title: "Advanced C++ Course", description: "master memory management,templates and concurrency",image: course7 },
-    { id: 8, title: "UI/UX Design", description: "Design beautiful and user-friendly interfaces",image: course8 }
-  
-];
-
-
 
 const Courses = () => {
   const user = JSON.parse(localStorage.getItem("user"));
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
- const [courses, setCourses]=useState(initialCourses)
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setError("Please log in to view courses");
+      setLoading(false);
+      return;
+    }
 
-  const handleAddCourse = () => {
-    const newCourse = { id: Date.now(), title: "New Course", description: "Course description" };
-    setCourses([...courses, newCourse]);
-    
-  
-  };
+    fetch("http://localhost:5000/api/courses", {
+      headers: { "Authorization": `Bearer ${token}` }
+    })
+      .then(res => {
+        if (!res.ok) {
+          return res.json().then(err => {
+            console.log("Error Response:", err); // Log the error response
+            throw new Error(err.error || `HTTP error! Status: ${res.status}`);
+          });
+        }
+        return res.json();
+      })
+      .then(data => {
+        console.log("API Response:", data);
+        if (Array.isArray(data)) {
+          setCourses(data);
+        } else {
+          setError("Unexpected response format from server");
+        }
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error("Fetch error:", err);
+        setError("Failed to load courses: " + err.message);
+        setLoading(false);
+      });
+  }, []);
 
   const handleDeleteCourse = (id) => {
-    setCourses(courses.filter(course => course.id !== id));
+    const token = localStorage.getItem("token");
+    fetch(`http://localhost:5000/api/admin/courses/${id}`, {
+      method: "DELETE",
+      headers: { "Authorization": `Bearer ${token}` }
+    })
+      .then(() => setCourses(courses.filter(course => course.id !== id)))
+      .catch(err => console.error("Error deleting course:", err));
   };
-  
+
+  if (loading) return <div>Loading courses...</div>;
+  if (error) return <div>{error}</div>;
+
   return (
-
     <div className="courses-container">
-      <h1 className="title"> Our Courses</h1>
-      
-      
-    <ul className="course-list">
+      <h1 className="title">Our Courses</h1>
+      <ul className="course-list">
         {courses.map((course) => (
-
-          <li key={course.id}  className="course-card">
-
-            <img src={course.image} alt={course.title} className="course-image" />
-            
-
-            <h3 className="course-title">{course.title}</h3>
-
-            <p className="course-description">{course.description}</p>
-
-            
-           <button className="view-course-btn">
-           <Link to={`/course/${course.id}`}>
-            View Course
-            </Link>
+          <li key={course.id} className="course-card">
+            <img src={course.image || "/images/default.png"} alt={course.name} className="course-image" />
+            <h3 className="course-title">{course.name}</h3>
+            <button className="view-course-btn">
+              <Link to={`/course/${course.id}`}>View Course</Link>
             </button>
-            
-
             {user && (user.role === "admin" || user.role === "instructor") && (
-
-            <button className="edit-course-btn">Edit Course</button>
+              <button className="edit-course-btn">Edit Course</button>
             )}
             {user && user.role === "admin" && (
-
-              <button  className="delete-course-btn" 
-               onClick={() => handleDeleteCourse(course.id)}>Delete Course</button>
+              <button className="delete-course-btn" onClick={() => handleDeleteCourse(course.id)}>
+                Delete Course
+              </button>
             )}
           </li>
         ))}

@@ -1,88 +1,65 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import './Login.css'
+import './Login.css';
 
 const Login = ({ setUser }) => {
-  const [role, setRole] = useState("learner"); 
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState(""); // Changed from email to username
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
   const handleLogin = (e) => {
     e.preventDefault();
-
-    // User data object
-    const userData = { email, role };
-
-    // Store logged-in user in localStorage
-    localStorage.setItem("user", JSON.stringify(userData)); 
-    setUser(userData);
-
-    // Retrieve existing logged-in users list from localStorage
-    let loggedInUsers = JSON.parse(localStorage.getItem("loggedInUsers")) || [];
-
-    // Avoid duplicate entries
-    if (!loggedInUsers.some((user) => user.email === email)) {
-      loggedInUsers.push(userData);
-      localStorage.setItem("loggedInUsers", JSON.stringify(loggedInUsers));
-    }
-
-    // Redirect based on role
-    if (role === "admin") {
-      navigate("/admin");
-    } else if (role === "instructor") {
-      navigate("/instructor-dashboard");
-    } else {
-      navigate("/dashboard");
-    }
+    fetch("http://localhost:5000/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password }) // Use username directly
+    })
+      .then(res => {
+        if (!res.ok) throw new Error("Login failed");
+        return res.json();
+      })
+      .then(data => {
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("user", JSON.stringify(data.user));
+        setUser(data.user);
+        if (data.user.role === "admin") navigate("/admin");
+        else if (data.user.role === "instructor") navigate("/instructor-dashboard");
+        else navigate("/courses");
+      })
+      .catch(err => {
+        console.error("Login error:", err);
+        alert("Invalid credentials");
+      });
   };
 
   return (
-    <div className="login-container" >
-       <div className="login-box">
-      <h2 >Login</h2>
-      <form onSubmit={handleLogin}>
-
-      <div className="input-group">
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          className="input-field"
-        />
-        </div>
-
-        <div className="input-group">
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          className="input-field"
-        />
-        </div>
-
-        <div className="input-group">
-        <label> Select Role:</label>
-        <select
-          value={role}
-          onChange={(e) => setRole(e.target.value)}
-           className="role-select"
-        >
-        
-          <option value="learner">Student</option>
-          <option value="instructor">Instructor</option>
-          <option value="admin">Admin</option>
-        </select>
-        </div>
-        <button type="submit" className="submit-btn" >
-          Login
-        </button>
-      </form>
-    </div>
+    <div className="login-container">
+      <div className="login-box">
+        <h2>Login</h2>
+        <form onSubmit={handleLogin}>
+          <div className="input-group">
+            <input
+              type="text" // Changed from email to text
+              placeholder="Username" // Updated placeholder
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+              className="input-field"
+            />
+          </div>
+          <div className="input-group">
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="input-field"
+            />
+          </div>
+          <button type="submit" className="submit-btn">Login</button>
+        </form>
+      </div>
     </div>
   );
 };
