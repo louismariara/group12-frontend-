@@ -3,23 +3,38 @@ import "./MyCourses.css";
 
 const MyCourses = () => {
   const [courses, setCourses] = useState([]);
+  const [error, setError] = useState(null);
   const user = JSON.parse(localStorage.getItem("user"));
 
   useEffect(() => {
-    if (user && user.role === "instructor") {
-      const token = localStorage.getItem("token");
-      fetch("http://localhost:5000/api/instructors/my-courses", {
-        headers: { "Authorization": `Bearer ${token}` }
-      })
-        .then(res => res.json())
-        .then(data => setCourses(data))
-        .catch(err => console.error("Error fetching courses:", err));
+    if (!user || user.role !== "instructor") {
+      setError("You must be an instructor to view this page.");
+      return;
     }
+
+    const token = localStorage.getItem("token");
+    fetch("http://localhost:5000/api/instructors/my-courses", {
+      headers: { "Authorization": `Bearer ${token}` }
+    })
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+        return res.json();
+      })
+      .then(data => {
+        if (Array.isArray(data)) {
+          setCourses(data);
+        } else {
+          setError("Unexpected response format from server");
+          console.error("Response is not an array:", data);
+        }
+      })
+      .catch(err => {
+        setError("Failed to load courses: " + err.message);
+        console.error("Fetch error:", err);
+      });
   }, []);
 
-  if (!user || user.role !== "instructor") {
-    return <div>You must be an instructor to view this page.</div>;
-  }
+  if (error) return <div>{error}</div>;
 
   return (
     <div className="my-courses-container">
@@ -45,8 +60,8 @@ const MyCourses = () => {
                   <span>{course.name}</span>
                 </div>
               </td>
-              <td>{course.students?.length || 0}</td> 
-              <td>{new Date().toLocaleDateString()}</td> 
+              <td>{course.students?.length || 0}</td>
+              <td>{course.created_at ? new Date(course.created_at).toLocaleDateString() : "N/A"}</td>
             </tr>
           ))}
         </tbody>

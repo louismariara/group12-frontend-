@@ -122,3 +122,18 @@ button {
       width: 90%;
   }
 }
+.edit-course-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 20px;
+  border: 1px solid #ccc;
+  z-index: 1000;
+}
+.edit-course-modal input, .edit-course-modal select {
+  display: block;
+  margin: 10px 0;
+  width: 100%;
+}

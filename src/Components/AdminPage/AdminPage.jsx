@@ -8,8 +8,10 @@ const AdminPage = () => {
   const [instructors, setInstructors] = useState([]);
   const [students, setStudents] = useState([]);
   const [grades, setGrades] = useState([]);
+  const [courses, setCourses] = useState([]); // Add courses state
   const [showInstructors, setShowInstructors] = useState(false);
   const [showStudents, setShowStudents] = useState(false);
+  const [showCourses, setShowCourses] = useState(false); // Toggle for courses
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user"));
 
@@ -42,6 +44,17 @@ const AdminPage = () => {
       .then(res => res.json())
       .then(data => setGrades(data))
       .catch(err => console.error("Error fetching grades:", err));
+
+    // Fetch all courses
+    fetch("http://localhost:5000/api/courses", {
+      headers: { "Authorization": `Bearer ${token}` }
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) setCourses(data);
+        else console.error("Courses data is not an array:", data);
+      })
+      .catch(err => console.error("Error fetching courses:", err));
   }, [navigate, user]);
 
   const approveInstructor = (userId) => {
@@ -53,7 +66,6 @@ const AdminPage = () => {
       .then(res => res.json())
       .then(data => {
         alert(data.message);
-        // Refresh instructors list
         fetch("http://localhost:5000/api/admin/users", {
           headers: { "Authorization": `Bearer ${token}` }
         })
@@ -73,24 +85,20 @@ const AdminPage = () => {
     <div className="admin-page">
       <div className="admin-container">
         <h1 className="admin-title">Admin Dashboard</h1>
-        <p className="admin-p">
-          Welcome, <span>{user?.username}</span>. Manage content here.
-        </p>
+        <p className="admin-p">Welcome, <span>{user?.username}</span>. Manage content here.</p>
 
         <div className="stats-container">
-          <div
-            className="stats-card"
-            onClick={() => setShowInstructors(!showInstructors)}
-          >
+          <div className="stats-card" onClick={() => setShowInstructors(!showInstructors)}>
             <h3>Instructors</h3>
             <p className="stats-count">{instructorCount}</p>
           </div>
-          <div
-            className="stats-card"
-            onClick={() => setShowStudents(!showStudents)}
-          >
+          <div className="stats-card" onClick={() => setShowStudents(!showStudents)}>
             <h3>Students</h3>
             <p className="stats-count">{studentCount}</p>
+          </div>
+          <div className="stats-card" onClick={() => setShowCourses(!showCourses)}>
+            <h3>Courses</h3>
+            <p className="stats-count">{courses.length}</p>
           </div>
         </div>
 
@@ -98,13 +106,11 @@ const AdminPage = () => {
           <div>
             <h3>Instructors List</h3>
             <ul>
-              {instructors.map((i) => (
+              {instructors.map(i => (
                 <li key={i.id}>
                   {i.username} ({i.email})
                   {i.is_instructor && !i.is_instructor_verified && (
-                    <button onClick={() => approveInstructor(i.id)}>
-                      Approve as Instructor
-                    </button>
+                    <button onClick={() => approveInstructor(i.id)}>Approve as Instructor</button>
                   )}
                 </li>
               ))}
@@ -116,8 +122,21 @@ const AdminPage = () => {
           <div>
             <h3>Students List</h3>
             <ul>
-              {students.map((s) => (
+              {students.map(s => (
                 <li key={s.id}>{s.username} ({s.email})</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {showCourses && (
+          <div>
+            <h3>All Courses</h3>
+            <ul>
+              {courses.map(c => (
+                <li key={c.id}>
+                  {c.name} (Duration: {c.duration}h, Instructor ID: {c.instructor_id || "None"})
+                </li>
               ))}
             </ul>
           </div>
@@ -126,7 +145,7 @@ const AdminPage = () => {
         <div>
           <h3>All Grades</h3>
           <ul>
-            {grades.map((g) => (
+            {grades.map(g => (
               <li key={g.id}>
                 Student ID: {g.student_id}, Course: {g.course?.name || g.course_id}, Grade: {g.grade}
               </li>

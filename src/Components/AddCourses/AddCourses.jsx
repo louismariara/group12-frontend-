@@ -8,6 +8,7 @@ const AddCourse = () => {
   const [description, setDescription] = useState("");
   const [thumbnailFile, setThumbnailFile] = useState(null);
   const [lectures, setLectures] = useState([]);
+  const [imageUrl, setImageUrl] = useState("");
   const [showLectureModal, setShowLectureModal] = useState(false);
   const [lectureTitle, setLectureTitle] = useState("");
   const [lectureDuration, setLectureDuration] = useState("");
@@ -45,11 +46,12 @@ const AddCourse = () => {
     }
     const courseData = {
       name: title,
-      duration: 4, // Add a field if you want this dynamic
-      image: thumbnailFile ? URL.createObjectURL(thumbnailFile) : null,
+      duration: 4,
+      image: imageUrl || null,  // Use the URL instead of file
       modules: lectures.length > 0 ? [{ title: "Module 1", lectures }] : null
     };
 
+    
     const token = localStorage.getItem("token");
     fetch("http://localhost:5000/api/admin/courses", {
       method: "POST",
