@@ -8,10 +8,13 @@ const AdminPage = () => {
   const [instructors, setInstructors] = useState([]);
   const [students, setStudents] = useState([]);
   const [grades, setGrades] = useState([]);
-  const [courses, setCourses] = useState([]); // Add courses state
+  const [courses, setCourses] = useState([]);
   const [showInstructors, setShowInstructors] = useState(false);
   const [showStudents, setShowStudents] = useState(false);
-  const [showCourses, setShowCourses] = useState(false); // Toggle for courses
+  const [showCourses, setShowCourses] = useState(false);
+  const [showGrades, setShowGrades] = useState(false);
+  const [newGrade, setNewGrade] = useState({ student_id: "", course_id: "", grade: "" });
+  const [editingGrade, setEditingGrade] = useState(null);
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user"));
 
@@ -41,19 +44,19 @@ const AdminPage = () => {
     fetch("http://localhost:5000/api/admin/grades", {
       headers: { "Authorization": `Bearer ${token}` }
     })
-      .then(res => res.json())
-      .then(data => setGrades(data))
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+        return res.json();
+      })
+      .then(data => setGrades(Array.isArray(data) ? data : []))
       .catch(err => console.error("Error fetching grades:", err));
 
-    // Fetch all courses
+    // Fetch courses
     fetch("http://localhost:5000/api/courses", {
       headers: { "Authorization": `Bearer ${token}` }
     })
       .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data)) setCourses(data);
-        else console.error("Courses data is not an array:", data);
-      })
+      .then(data => setCourses(Array.isArray(data) ? data : []))
       .catch(err => console.error("Error fetching courses:", err));
   }, [navigate, user]);
 
@@ -79,6 +82,61 @@ const AdminPage = () => {
       .catch(err => console.error("Error approving instructor:", err));
   };
 
+  const handleCreateGrade = () => {
+    const token = localStorage.getItem("token");
+    fetch("http://localhost:5000/api/admin/grades", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(newGrade)
+    })
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+        return res.json();
+      })
+      .then(data => {
+        setGrades([...grades, { id: data.id, ...newGrade }]);
+        setNewGrade({ student_id: "", course_id: "", grade: "" });
+      })
+      .catch(err => console.error("Error creating grade:", err));
+  };
+
+  const handleUpdateGrade = (grade) => {
+    const token = localStorage.getItem("token");
+    fetch(`http://localhost:5000/api/admin/grades/${grade.id}`, {
+      method: "PUT",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(grade)
+    })
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+        return res.json();
+      })
+      .then(() => {
+        setGrades(grades.map(g => (g.id === grade.id ? grade : g)));
+        setEditingGrade(null);
+      })
+      .catch(err => console.error("Error updating grade:", err));
+  };
+
+  const handleDeleteGrade = (gradeId) => {
+    const token = localStorage.getItem("token");
+    fetch(`http://localhost:5000/api/admin/grades/${gradeId}`, {
+      method: "DELETE",
+      headers: { "Authorization": `Bearer ${token}` }
+    })
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+        setGrades(grades.filter(g => g.id !== gradeId));
+      })
+      .catch(err => console.error("Error deleting grade:", err));
+  };
+
   if (!user || user.role !== "admin") return null;
 
   return (
@@ -99,6 +157,10 @@ const AdminPage = () => {
           <div className="stats-card" onClick={() => setShowCourses(!showCourses)}>
             <h3>Courses</h3>
             <p className="stats-count">{courses.length}</p>
+          </div>
+          <div className="stats-card" onClick={() => setShowGrades(!showGrades)}>
+            <h3>Grades</h3>
+            <p className="stats-count">{grades.length}</p>
           </div>
         </div>
 
@@ -142,16 +204,70 @@ const AdminPage = () => {
           </div>
         )}
 
-        <div>
-          <h3>All Grades</h3>
-          <ul>
-            {grades.map(g => (
-              <li key={g.id}>
-                Student ID: {g.student_id}, Course: {g.course?.name || g.course_id}, Grade: {g.grade}
-              </li>
-            ))}
-          </ul>
-        </div>
+        {showGrades && (
+          <div>
+            <h3>All Grades</h3>
+            <div className="grade-form">
+              <h4>Add New Grade</h4>
+              <input
+                type="number"
+                placeholder="Student ID"
+                value={newGrade.student_id}
+                onChange={e => setNewGrade({ ...newGrade, student_id: e.target.value })}
+              />
+              <input
+                type="number"
+                placeholder="Course ID"
+                value={newGrade.course_id}
+                onChange={e => setNewGrade({ ...newGrade, course_id: e.target.value })}
+              />
+              <input
+                type="text"
+                placeholder="Grade"
+                value={newGrade.grade}
+                onChange={e => setNewGrade({ ...newGrade, grade: e.target.value })}
+              />
+              <button onClick={handleCreateGrade}>Add Grade</button>
+            </div>
+            {grades.length > 0 ? (
+              <ul>
+                {grades.map(g => (
+                  <li key={g.id}>
+                    {editingGrade && editingGrade.id === g.id ? (
+                      <>
+                        <input
+                          type="number"
+                          value={editingGrade.student_id}
+                          onChange={e => setEditingGrade({ ...editingGrade, student_id: e.target.value })}
+                        />
+                        <input
+                          type="number"
+                          value={editingGrade.course_id}
+                          onChange={e => setEditingGrade({ ...editingGrade, course_id: e.target.value })}
+                        />
+                        <input
+                          type="text"
+                          value={editingGrade.grade}
+                          onChange={e => setEditingGrade({ ...editingGrade, grade: e.target.value })}
+                        />
+                        <button onClick={() => handleUpdateGrade(editingGrade)}>Save</button>
+                        <button onClick={() => setEditingGrade(null)}>Cancel</button>
+                      </>
+                    ) : (
+                      <>
+                        Student ID: {g.student_id}, Course: {g.course?.name || g.course_id}, Grade: {g.grade}
+                        <button onClick={() => setEditingGrade({ ...g })}>Edit</button>
+                        <button onClick={() => handleDeleteGrade(g.id)}>Delete</button>
+                      </>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>No grades available.</p>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

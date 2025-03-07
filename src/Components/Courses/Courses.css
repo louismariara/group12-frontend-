@@ -137,3 +137,15 @@ button {
   margin: 10px 0;
   width: 100%;
 }
+.enroll-btn {
+  margin-left: 10px;
+  padding: 5px 10px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.enroll-btn:hover {
+  background-color: #218838;
+}

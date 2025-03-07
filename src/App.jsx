@@ -4,7 +4,7 @@ import Home from "./Components/Home/Home";
 import Navbar from "./Components/Navbar/Navbar";
 import Login from "./Components/Login/Login";
 import Signup from "./Components/signup/Signup";
-import Grades from "./Components/Grades/Grades";
+import Grades from "./Components/Grades/Grades"; // Using your uploaded version
 import Courses from "./Components/Courses/Courses";
 import AdminPage from "./Components/AdminPage/AdminPage";
 import CourseDetails from "./Components/CourseDetails/CourseDetails";
@@ -27,7 +27,7 @@ const App = () => {
         <Route path="/courses" element={<Courses />} />
         <Route path="/admin" element={<AdminPage />} />
         <Route path="/grades" element={<Grades />} />
-        <Route path="/course/:id" element={<CourseDetails />} />
+        <Route path="/course/:courseId" element={<CourseDetails />} />
         <Route path="/my-courses" element={<MyCourses courses={[]} />} />
         <Route path="/add-courses" element={<AddCourses />} />
       </Routes>

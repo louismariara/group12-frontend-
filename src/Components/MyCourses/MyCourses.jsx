@@ -4,16 +4,22 @@ import "./MyCourses.css";
 const MyCourses = () => {
   const [courses, setCourses] = useState([]);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
   const user = JSON.parse(localStorage.getItem("user"));
 
   useEffect(() => {
-    if (!user || user.role !== "instructor") {
-      setError("You must be an instructor to view this page.");
+    if (!user) {
+      setError("Please log in to view your courses.");
+      setLoading(false);
       return;
     }
 
     const token = localStorage.getItem("token");
-    fetch("http://localhost:5000/api/instructors/my-courses", {
+    const endpoint = user.is_instructor ? 
+      "http://localhost:5000/api/instructors/my-courses" : 
+      "http://localhost:5000/api/students/my-courses";
+
+    fetch(endpoint, {
       headers: { "Authorization": `Bearer ${token}` }
     })
       .then(res => {
@@ -27,23 +33,26 @@ const MyCourses = () => {
           setError("Unexpected response format from server");
           console.error("Response is not an array:", data);
         }
+        setLoading(false);
       })
       .catch(err => {
         setError("Failed to load courses: " + err.message);
+        setLoading(false);
         console.error("Fetch error:", err);
       });
   }, []);
 
+  if (loading) return <div>Loading courses...</div>;
   if (error) return <div>{error}</div>;
 
   return (
     <div className="my-courses-container">
-      <h2>My Courses</h2>
+      <h2>{user.is_instructor ? "My Courses (Teaching)" : "My Enrolled Courses"}</h2>
       <table className="courses-table">
         <thead>
           <tr>
-            <th>All Courses</th>
-            <th>Students</th>
+            <th>Course Name</th>
+            {user.is_instructor && <th>Students</th>}
             <th>Published On</th>
           </tr>
         </thead>
@@ -60,7 +69,9 @@ const MyCourses = () => {
                   <span>{course.name}</span>
                 </div>
               </td>
-              <td>{course.students?.length || 0}</td>
+              {user.is_instructor && (
+                <td>{course.students?.length || 0}</td>
+              )}
               <td>{course.created_at ? new Date(course.created_at).toLocaleDateString() : "N/A"}</td>
             </tr>
           ))}
