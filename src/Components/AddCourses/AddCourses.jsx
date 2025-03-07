@@ -53,7 +53,7 @@ const AddCourse = () => {
 
     
     const token = localStorage.getItem("token");
-    fetch("http://localhost:5000/api/admin/courses", {
+    fetch("https://group12-backend-cv2o.onrender.com/api/admin/courses", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

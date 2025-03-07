@@ -1,6 +1,4 @@
-.course-box{
-  
-}
+
 
 
 .course-details {
@@ -30,12 +28,11 @@
     color: #555;
   }
   
-  .courses-image {
-    width: 600px;
+  .course-image {
+    max-width: 100%;
     height: auto;
     border-radius: 8px;
-    margin-top:20px;
-    
+    margin: 10px 0;
   }
   
   /* Course Structure */

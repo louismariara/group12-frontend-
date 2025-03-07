@@ -20,7 +20,7 @@ const Signup = ({ setUser }) => {
       is_student: role === "student"
     };
 
-    fetch("http://localhost:5000/api/auth/signup", {
+    fetch("https://group12-backend-cv2o.onrender.com/api/auth/signup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(userData)

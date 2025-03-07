@@ -9,7 +9,7 @@ const Login = ({ setUser }) => {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    fetch("http://localhost:5000/api/auth/login", {
+    fetch("https://group12-backend-cv2o.onrender.com/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }) // Use username directly

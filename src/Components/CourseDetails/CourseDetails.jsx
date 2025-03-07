@@ -16,7 +16,7 @@ const CourseDetails = () => {
       return;
     }
 
-    fetch(`http://localhost:5000/api/courses/${courseId}`, {
+    fetch(`https://group12-backend-cv2o.onrender.com/api/courses/${courseId}`, {
       headers: { "Authorization": `Bearer ${token}` }
     })
       .then(res => {
@@ -52,11 +52,19 @@ const CourseDetails = () => {
       {course.modules && (
         <div>
           <h3>Modules</h3>
-          <ul>
-            {course.modules.map((module, index) => (
-              <li key={index}>{module.title}</li>
-            ))}
-          </ul>
+          {course.modules.map((module, index) => (
+            <div key={index}>
+              <h4>{module.title}</h4>
+              <ul>
+                {module.lectures.map((lecture, i) => (
+                  <li key={i}>
+                    {lecture.title} ({lecture.duration}) -{" "}
+                    <a href={lecture.video} target="_blank" rel="noopener noreferrer">Watch</a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
       )}
     </div>

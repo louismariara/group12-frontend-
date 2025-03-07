@@ -1,82 +1,241 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./MyCourses.css";
 
 const MyCourses = () => {
   const [courses, setCourses] = useState([]);
-  const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [newCourse, setNewCourse] = useState({ name: "", duration: "" });
+  const [editingCourse, setEditingCourse] = useState(null);
+  const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user"));
 
   useEffect(() => {
-    if (!user) {
-      setError("Please log in to view your courses.");
+    // Allow admin, instructor, or student roles
+    if (!user || (user.role !== "admin" && user.role !== "instructor" && user.role !== "student")) {
+      console.log("Redirecting to /: User is not admin, instructor, or student", user);
+      setError("Please log in as an admin, instructor, or student to view courses.");
       setLoading(false);
+      navigate("/");
       return;
     }
 
     const token = localStorage.getItem("token");
-    const endpoint = user.is_instructor ? 
-      "http://localhost:5000/api/instructors/my-courses" : 
-      "http://localhost:5000/api/students/my-courses";
+    if (!token) {
+      setError("No token found. Please log in again.");
+      setLoading(false);
+      return;
+    }
+
+    const endpoint =
+      user.role === "admin"
+        ? "https://group12-backend-cv2o.onrender.com/api/admin/courses"
+        : user.role === "instructor"
+        ? "https://group12-backend-cv2o.onrender.com/api/instructors/my-courses"
+        : "https://group12-backend-cv2o.onrender.com/api/students/my-courses";
 
     fetch(endpoint, {
-      headers: { "Authorization": `Bearer ${token}` }
+      headers: { "Authorization": `Bearer ${token}` },
     })
-      .then(res => {
+      .then((res) => {
         if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
         return res.json();
       })
-      .then(data => {
-        if (Array.isArray(data)) {
-          setCourses(data);
-        } else {
-          setError("Unexpected response format from server");
-          console.error("Response is not an array:", data);
-        }
+      .then((data) => {
+        setCourses(Array.isArray(data) ? data : []);
         setLoading(false);
       })
-      .catch(err => {
-        setError("Failed to load courses: " + err.message);
-        setLoading(false);
+      .catch((err) => {
         console.error("Fetch error:", err);
+        setError(`Failed to load courses: ${err.message}`);
+        setLoading(false);
       });
-  }, []);
+  }, [navigate, user]);
+
+  const handleCreateCourse = () => {
+    const token = localStorage.getItem("token");
+    const endpoint =
+      user.role === "admin"
+        ? "https://group12-backend-cv2o.onrender.com/api/admin/courses"
+        : "https://group12-backend-cv2o.onrender.com/api/instructors/courses"; // Note: Instructor POST not defined yet
+    fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(newCourse),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+        return res.json();
+      })
+      .then((data) => {
+        setCourses([...courses, { id: data.id || courses.length + 1, ...newCourse }]);
+        setNewCourse({ name: "", duration: "" });
+      })
+      .catch((err) => setError(`Error creating course: ${err.message}`));
+  };
+
+  const handleUpdateCourse = (course) => {
+    const token = localStorage.getItem("token");
+    const endpoint =
+      user.role === "admin"
+        ? `https://group12-backend-cv2o.onrender.com/api/admin/courses/${course.id}`
+        : `https://group12-backend-cv2o.onrender.com/api/instructors/courses/${course.id}`;
+    fetch(endpoint, {
+      method: "PUT",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(course),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+        return res.json();
+      })
+      .then(() => {
+        setCourses(courses.map((c) => (c.id === course.id ? course : c)));
+        setEditingCourse(null);
+      })
+      .catch((err) => setError(`Error updating course: ${err.message}`));
+  };
+
+  const handleDeleteCourse = (courseId) => {
+    const token = localStorage.getItem("token");
+    const endpoint =
+      user.role === "admin"
+        ? `https://group12-backend-cv2o.onrender.com/api/admin/courses/${courseId}`
+        : `https://group12-backend-cv2o.onrender.com/api/instructors/courses/${courseId}`;
+    fetch(endpoint, {
+      method: "DELETE",
+      headers: { "Authorization": `Bearer ${token}` },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+        return res.json();
+      })
+      .then(() => {
+        setCourses(courses.filter((c) => c.id !== courseId));
+      })
+      .catch((err) => setError(`Error deleting course: ${err.message}`));
+  };
 
   if (loading) return <div>Loading courses...</div>;
   if (error) return <div>{error}</div>;
 
+  const isEditable = user.role === "admin" || user.role === "instructor";
+
   return (
     <div className="my-courses-container">
-      <h2>{user.is_instructor ? "My Courses (Teaching)" : "My Enrolled Courses"}</h2>
-      <table className="courses-table">
-        <thead>
-          <tr>
-            <th>Course Name</th>
-            {user.is_instructor && <th>Students</th>}
-            <th>Published On</th>
-          </tr>
-        </thead>
-        <tbody>
-          {courses.map((course) => (
-            <tr key={course.id}>
-              <td className="course-info">
-                <div className="course-info-wrapper">
-                  <img
-                    src={course.image || "/images/default.png"}
-                    alt={course.name}
-                    className="my-course-image"
-                  />
-                  <span>{course.name}</span>
-                </div>
-              </td>
-              {user.is_instructor && (
-                <td>{course.students?.length || 0}</td>
-              )}
-              <td>{course.created_at ? new Date(course.created_at).toLocaleDateString() : "N/A"}</td>
+      <h2>
+        {user.role === "admin"
+          ? "All Courses"
+          : user.role === "instructor"
+          ? "My Courses (Teaching)"
+          : "My Enrolled Courses"}
+      </h2>
+
+      {isEditable && (
+        <div className="course-form">
+          <h4>Add New Course</h4>
+          <input
+            type="text"
+            placeholder="Course Name"
+            value={newCourse.name}
+            onChange={(e) => setNewCourse({ ...newCourse, name: e.target.value })}
+          />
+          <input
+            type="number"
+            placeholder="Duration (weeks)"
+            value={newCourse.duration}
+            onChange={(e) => setNewCourse({ ...newCourse, duration: e.target.value })}
+          />
+          <button onClick={handleCreateCourse}>Add Course</button>
+        </div>
+      )}
+
+      {courses.length > 0 ? (
+        <table className="courses-table">
+          <thead>
+            <tr>
+              <th>Course Name</th>
+              {user.role === "instructor" && <th>Students</th>}
+              <th>Published On</th>
+              {isEditable && <th>Actions</th>}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {courses.map((course) => (
+              <tr key={course.id}>
+                <td className="course-info">
+                  {editingCourse && editingCourse.id === course.id ? (
+                    <>
+                      <input
+                        type="text"
+                        value={editingCourse.name}
+                        onChange={(e) =>
+                          setEditingCourse({ ...editingCourse, name: e.target.value })
+                        }
+                      />
+                      <input
+                        type="number"
+                        value={editingCourse.duration}
+                        onChange={(e) =>
+                          setEditingCourse({ ...editingCourse, duration: e.target.value })
+                        }
+                      />
+                    </>
+                  ) : (
+                    <div className="course-info-wrapper">
+                      <img
+                        src={course.image || "/images/default.png"}
+                        alt={course.name}
+                        className="my-course-image"
+                        onError={(e) => (e.target.src = "/images/default.png")}
+                      />
+                      <span>{course.name}</span>
+                    </div>
+                  )}
+                </td>
+                {user.role === "instructor" && (
+                  <td>{course.students ? course.students.length : 0}</td>
+                )}
+                <td>
+                  {course.created_at
+                    ? new Date(course.created_at).toLocaleDateString()
+                    : "N/A"}
+                </td>
+                {isEditable && (
+                  <td>
+                    {editingCourse && editingCourse.id === course.id ? (
+                      <>
+                        <button onClick={() => handleUpdateCourse(editingCourse)}>
+                          Save
+                        </button>
+                        <button onClick={() => setEditingCourse(null)}>Cancel</button>
+                      </>
+                    ) : (
+                      <>
+                        <button onClick={() => setEditingCourse({ ...course })}>
+                          Edit
+                        </button>
+                        <button onClick={() => handleDeleteCourse(course.id)}>
+                          Delete
+                        </button>
+                      </>
+                    )}
+                  </td>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        <p>No courses available.</p>
+      )}
     </div>
   );
 };

@@ -49,6 +49,11 @@
   margin-bottom: 10px;
   
 }
+.course-duration {
+  font-size: 0.9em;
+  color: #666;
+  margin: 5px 0;
+}
 
 .course-title {
   font-size: 20px;

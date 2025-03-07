@@ -19,7 +19,7 @@ const Courses = () => {
       return;
     }
 
-    fetch("http://localhost:5000/api/courses", {
+    fetch("https://group12-backend-cv2o.onrender.com/api/courses", {
       headers: { "Authorization": `Bearer ${token}` }
     })
       .then(res => {
@@ -32,14 +32,14 @@ const Courses = () => {
         setLoading(false);
       })
       .catch(err => {
-        setError("Failed to load courses: " + err.message);
+        setError(`Failed to load courses: ${err.message}`);
         setLoading(false);
       });
   }, []);
 
   const handleEnroll = (courseId) => {
     const token = localStorage.getItem("token");
-    fetch("http://localhost:5000/api/students/enroll", {
+    fetch("https://group12-backend-cv2o.onrender.com/api/students/enroll", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${token}`,
@@ -52,20 +52,24 @@ const Courses = () => {
         return res.json();
       })
       .then(data => alert(data.message))
-      .catch(err => alert("Error enrolling: " + err.message));
+      .catch(err => setError(`Error enrolling: ${err.message}`));
   };
 
   const handleDeleteCourse = (id) => {
     const token = localStorage.getItem("token");
-    fetch(`http://localhost:5000/api/admin/courses/${id}`, {
+    fetch(`https://group12-backend-cv2o.onrender.com/api/admin/courses/${id}`, {
       method: "DELETE",
       headers: { "Authorization": `Bearer ${token}` }
     })
       .then(res => {
         if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-        setCourses(courses.filter(course => course.id !== id));
+        return res.json();
       })
-      .catch(err => console.error("Error deleting course:", err));
+      .then(() => {
+        setCourses(courses.filter(course => course.id !== id));
+        alert("Course deleted successfully");
+      })
+      .catch(err => setError(`Error deleting course: ${err.message}`));
   };
 
   const handleEditCourse = (course) => {
@@ -74,7 +78,10 @@ const Courses = () => {
 
   const saveEditedCourse = () => {
     const token = localStorage.getItem("token");
-    fetch(`http://localhost:5000/api/instructors/courses/${editingCourse.id}`, {
+    const endpoint = user.is_admin ? 
+      `https://group12-backend-cv2o.onrender.com/api/admin/courses/${editingCourse.id}` : 
+      `https://group12-backend-cv2o.onrender.com/api/instructors/courses/${editingCourse.id}`;
+    fetch(endpoint, {
       method: "PUT",
       headers: {
         "Authorization": `Bearer ${token}`,
@@ -89,13 +96,14 @@ const Courses = () => {
       .then(updatedCourse => {
         setCourses(courses.map(c => (c.id === updatedCourse.id ? updatedCourse : c)));
         setEditingCourse(null);
+        alert("Course updated successfully");
       })
-      .catch(err => console.error("Error updating course:", err));
+      .catch(err => setError(`Error updating course: ${err.message}`));
   };
 
   const handleAddCourse = () => {
     const token = localStorage.getItem("token");
-    fetch("http://localhost:5000/api/courses", {
+    fetch("https://group12-backend-cv2o.onrender.com/api/admin/courses", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${token}`,
@@ -110,7 +118,7 @@ const Courses = () => {
       .then(data => {
         setCourses([...courses, data]);
         if (user?.is_instructor) {
-          fetch("http://localhost:5000/api/instructors/assign-course", {
+          fetch("https://group12-backend-cv2o.onrender.com/api/instructors/assign-course", {
             method: "POST",
             headers: {
               "Authorization": `Bearer ${token}`,
@@ -118,7 +126,10 @@ const Courses = () => {
             },
             body: JSON.stringify({ course_id: data.id })
           })
-            .then(res => res.json())
+            .then(res => {
+              if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+              return res.json();
+            })
             .then(assignData => alert(assignData.message));
         } else {
           alert("Course added successfully");
@@ -126,7 +137,7 @@ const Courses = () => {
         setNewCourse({ name: "", duration: "", image: "" });
         setShowAddForm(false);
       })
-      .catch(err => alert("Error adding course: " + err.message));
+      .catch(err => setError(`Error adding course: ${err.message}`));
   };
 
   if (loading) return <div>Loading courses...</div>;
@@ -168,6 +179,7 @@ const Courses = () => {
           <li key={course.id} className="course-card">
             <img src={course.image || "/images/default.png"} alt={course.name} className="course-image" />
             <h3 className="course-title">{course.name}</h3>
+            <p className="course-duration">Duration: {course.duration} hours</p> 
             <button className="view-course-btn">
               <Link to={`/course/${course.id}`}>View Course</Link>
             </button>
