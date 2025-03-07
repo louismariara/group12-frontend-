@@ -40,13 +40,13 @@ const AdminPage = () => {
     const fetchData = async () => {
       try {
         const [usersRes, gradesRes, coursesRes] = await Promise.all([
-          fetch("http://localhost:5000/api/admin/users", {
+          fetch("https://group12-backend-cv2o.onrender.com/api/admin/users", {
             headers: { "Authorization": `Bearer ${token}` },
           }).then((res) => res.json()),
-          fetch("http://localhost:5000/api/admin/grades", {
+          fetch("https://group12-backend-cv2o.onrender.com/api/admin/grades", {
             headers: { "Authorization": `Bearer ${token}` },
           }).then((res) => res.json()),
-          fetch("http://localhost:5000/api/admin/courses", {
+          fetch("https://group12-backend-cv2o.onrender.com/api/admin/courses", {
             headers: { "Authorization": `Bearer ${token}` },
           }).then((res) => res.json()),
         ]);
@@ -80,7 +80,7 @@ const AdminPage = () => {
 
   const approveInstructor = (userId) => {
     const token = localStorage.getItem("token");
-    fetch(`http://localhost:5000/api/admin/users/${userId}/approve-instructor`, {
+    fetch(`https://group12-backend-cv2o.onrender.com/api/admin/users/${userId}/approve-instructor`, {
       method: "PUT",
       headers: { "Authorization": `Bearer ${token}` },
     })
@@ -90,7 +90,7 @@ const AdminPage = () => {
       })
       .then((data) => {
         alert(data.message);
-        fetch("http://localhost:5000/api/admin/users", {
+        fetch("https://group12-backend-cv2o.onrender.com/api/admin/users", {
           headers: { "Authorization": `Bearer ${token}` },
         })
           .then((res) => res.json())
@@ -105,7 +105,7 @@ const AdminPage = () => {
 
   const handleCreateGrade = () => {
     const token = localStorage.getItem("token");
-    fetch("http://localhost:5000/api/admin/grades", {
+    fetch("https://group12-backend-cv2o.onrender.com/api/admin/grades", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${token}`,
@@ -127,7 +127,7 @@ const AdminPage = () => {
 
   const handleUpdateGrade = (grade) => {
     const token = localStorage.getItem("token");
-    fetch(`http://localhost:5000/api/admin/grades/${grade.id}`, {
+    fetch(`https://group12-backend-cv2o.onrender.com/api/admin/grades/${grade.id}`, {
       method: "PUT",
       headers: {
         "Authorization": `Bearer ${token}`,
