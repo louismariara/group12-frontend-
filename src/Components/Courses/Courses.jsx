@@ -27,12 +27,18 @@ const Courses = () => {
         return res.json();
       })
       .then(data => {
-        console.log("Fetched courses:", data);
-        if (Array.isArray(data)) setCourses(data);
-        else setError("Unexpected response format from server");
+        console.log("Fetched courses:", data);  // Debug: Raw response
+        if (Array.isArray(data)) {
+          console.log("Number of courses fetched:", data.length);  // Debug: Count fetched
+          setCourses(data);
+          console.log("Courses state set with:", data.length, "items");  // Debug: Count set
+        } else {
+          setError("Unexpected response format from server");
+        }
         setLoading(false);
       })
       .catch(err => {
+        console.error("Fetch error:", err);  // Debug: Log errors
         setError(`Failed to load courses: ${err.message}`);
         setLoading(false);
       });
@@ -142,7 +148,7 @@ const Courses = () => {
   };
 
   if (loading) return <div>Loading courses...</div>;
-  if (error) return <div>{error}</div>;
+  if (error) return <div className="error-message">{error}</div>;  // Styled error handling
 
   return (
     <div className="courses-container">
@@ -180,7 +186,7 @@ const Courses = () => {
           <li key={course.id} className="course-card">
             <img src={course.image || "/images/default.png"} alt={course.name} className="course-image" />
             <h3 className="course-title">{course.name}</h3>
-            <p className="course-duration">Duration: {course.duration} hours</p> 
+            <p className="course-duration">Duration: {course.duration} hours</p>  // Added duration display
             <button className="view-course-btn">
               <Link to={`/course/${course.id}`}>View Course</Link>
             </button>
@@ -202,7 +208,6 @@ const Courses = () => {
           </li>
         ))}
       </ul>
-
       {editingCourse && (
         <div className="edit-course-modal">
           <h3>Edit Course</h3>
