@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import './Login.css';
 
 const Login = ({ setUser }) => {
-  const [username, setUsername] = useState(""); // Changed from email to username
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
@@ -12,23 +12,30 @@ const Login = ({ setUser }) => {
     fetch("https://group12-backend-cv2o.onrender.com/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }) // Use username directly
+      body: JSON.stringify({ username, password })
     })
       .then(res => {
-        if (!res.ok) throw new Error("Login failed");
+        if (!res.ok) {
+          return res.json().then(err => { throw new Error(err.message || "Login failed"); });
+        }
         return res.json();
       })
       .then(data => {
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("user", JSON.stringify(data.user));
-        setUser(data.user);
-        if (data.user.role === "admin") navigate("/admin");
-        else if (data.user.role === "instructor") navigate("/instructor-dashboard");
-        else navigate("/courses");
+        if (typeof window !== "undefined" && window.localStorage) {
+          localStorage.setItem("token", data.token);
+          localStorage.setItem("user", JSON.stringify(data.user));
+          setUser(data.user);
+          if (data.user.role === "admin") navigate("/admin");
+          else if (data.user.role === "instructor") navigate("/instructor-dashboard");
+          else navigate("/courses");
+        } else {
+          console.error("localStorage not available");
+          alert("Storage error, login succeeded but token not saved");
+        }
       })
       .catch(err => {
-        console.error("Login error:", err);
-        alert("Invalid credentials");
+        console.error("Login error:", err.message);
+        alert(err.message); // Show backend message like "Invalid credentials"
       });
   };
 
@@ -39,8 +46,8 @@ const Login = ({ setUser }) => {
         <form onSubmit={handleLogin}>
           <div className="input-group">
             <input
-              type="text" // Changed from email to text
-              placeholder="Username" // Updated placeholder
+              type="text"
+              placeholder="Username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
