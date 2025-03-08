@@ -4,7 +4,7 @@ import "./MyCourses.css";
 
 const MyCourses = () => {
   const [courses, setCourses] = useState([]);
-  const [instructors, setInstructors] = useState([]); // New state for instructors
+  const [instructors, setInstructors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [newCourse, setNewCourse] = useState({ name: "", duration: "" });
@@ -15,7 +15,6 @@ const MyCourses = () => {
   useEffect(() => {
     if (!user || (user.role !== "admin" && user.role !== "instructor" && user.role !== "student")) {
       console.log("Redirecting to /: User is not admin, instructor, or student", user);
-      setError("Please log in as an admin, instructor, or student to view courses.");
       setLoading(false);
       navigate("/");
       return;
@@ -23,7 +22,7 @@ const MyCourses = () => {
 
     const token = localStorage.getItem("token");
     if (!token) {
-      setError("No token found. Please log in again.");
+      console.error("No token found. Please log in again.");
       setLoading(false);
       return;
     }
@@ -35,7 +34,6 @@ const MyCourses = () => {
         ? "https://group12-backend-cv2o.onrender.com/api/instructors/my-courses"
         : "https://group12-backend-cv2o.onrender.com/api/students/my-courses";
 
-    // Fetch courses
     fetch(endpoint, {
       headers: { "Authorization": `Bearer ${token}` },
     })
@@ -49,11 +47,9 @@ const MyCourses = () => {
       })
       .catch((err) => {
         console.error("Fetch error:", err);
-        setError(`Failed to load courses: ${err.message}`);
         setLoading(false);
       });
 
-    // Fetch instructors (for admin only)
     if (user.role === "admin") {
       fetch("https://group12-backend-cv2o.onrender.com/api/instructors", {
         headers: { "Authorization": `Bearer ${token}` },
@@ -92,7 +88,7 @@ const MyCourses = () => {
         setCourses([...courses, { id: data.id || courses.length + 1, ...newCourse }]);
         setNewCourse({ name: "", duration: "" });
       })
-      .catch((err) => setError(`Error creating course: ${err.message}`));
+      .catch((err) => console.error("Error creating course:", err.message));
   };
 
   const handleUpdateCourse = (course) => {
@@ -113,11 +109,11 @@ const MyCourses = () => {
         if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
         return res.json();
       })
-      .then(() => {
-        setCourses(courses.map((c) => (c.id === course.id ? course : c)));
+      .then((updatedCourse) => {
+        setCourses(courses.map((c) => (c.id === course.id ? updatedCourse : c)));
         setEditingCourse(null);
       })
-      .catch((err) => setError(`Error updating course: ${err.message}`));
+      .catch((err) => console.error("Error updating course:", err.message));
   };
 
   const handleDeleteCourse = (courseId) => {
@@ -137,11 +133,14 @@ const MyCourses = () => {
       .then(() => {
         setCourses(courses.filter((c) => c.id !== courseId));
       })
-      .catch((err) => setError(`Error deleting course: ${err.message}`));
+      .catch((err) => console.error("Error deleting course:", err.message));
   };
 
   if (loading) return <div>Loading courses...</div>;
-  if (error) return <div>{error}</div>;
+  if (error) {
+    console.error("Error state:", error);
+    return null;
+  }
 
   const isEditable = user.role === "admin" || user.role === "instructor";
 
@@ -181,6 +180,7 @@ const MyCourses = () => {
               <th>Course Name</th>
               {user.role === "instructor" && <th>Students</th>}
               <th>Published On</th>
+              {user.role === "admin" && <th>Instructor</th>} {/* New column */}
               {isEditable && <th>Actions</th>}
             </tr>
           </thead>
@@ -243,6 +243,11 @@ const MyCourses = () => {
                     ? new Date(course.created_at).toLocaleDateString()
                     : "N/A"}
                 </td>
+                {user.role === "admin" && (
+                  <td>
+                    {instructors.find((i) => i.id === course.instructor_id)?.username || "None"}
+                  </td>
+                )}
                 {isEditable && (
                   <td>
                     {editingCourse && editingCourse.id === course.id ? (
