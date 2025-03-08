@@ -27,6 +27,7 @@ const Courses = () => {
         return res.json();
       })
       .then(data => {
+        console.log("Fetched courses:", data);
         if (Array.isArray(data)) setCourses(data);
         else setError("Unexpected response format from server");
         setLoading(false);
