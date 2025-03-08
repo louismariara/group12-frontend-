@@ -14,7 +14,7 @@ const Courses = () => {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
-      setError("Please log in to view courses");
+      console.error("No token found: Please log in to view courses");
       setLoading(false);
       return;
     }
@@ -27,19 +27,18 @@ const Courses = () => {
         return res.json();
       })
       .then(data => {
-        console.log("Fetched courses:", data);  // Debug: Raw response
+        console.log("Fetched courses:", data);
         if (Array.isArray(data)) {
-          console.log("Number of courses fetched:", data.length);  // Debug: Count fetched
+          console.log("Number of courses fetched:", data.length);
           setCourses(data);
-          console.log("Courses state set with:", data.length, "items");  // Debug: Count set
+          console.log("Courses state set with:", data.length, "items");
         } else {
-          setError("Unexpected response format from server");
+          console.error("Unexpected response format from server:", data);
         }
         setLoading(false);
       })
       .catch(err => {
-        console.error("Fetch error:", err);  // Debug: Log errors
-        setError(`Failed to load courses: ${err.message}`);
+        console.error("Fetch error:", err.message);
         setLoading(false);
       });
   }, []);
@@ -59,7 +58,7 @@ const Courses = () => {
         return res.json();
       })
       .then(data => alert(data.message))
-      .catch(err => setError(`Error enrolling: ${err.message}`));
+      .catch(err => console.error("Error enrolling:", err.message));
   };
 
   const handleDeleteCourse = (id) => {
@@ -76,7 +75,7 @@ const Courses = () => {
         setCourses(courses.filter(course => course.id !== id));
         alert("Course deleted successfully");
       })
-      .catch(err => setError(`Error deleting course: ${err.message}`));
+      .catch(err => console.error("Error deleting course:", err.message));
   };
 
   const handleEditCourse = (course) => {
@@ -105,7 +104,7 @@ const Courses = () => {
         setEditingCourse(null);
         alert("Course updated successfully");
       })
-      .catch(err => setError(`Error updating course: ${err.message}`));
+      .catch(err => console.error("Error updating course:", err.message));
   };
 
   const handleAddCourse = () => {
@@ -144,11 +143,16 @@ const Courses = () => {
         setNewCourse({ name: "", duration: "", image: "" });
         setShowAddForm(false);
       })
-      .catch(err => setError(`Error adding course: ${err.message}`));
+      .catch(err => console.error("Error adding course:", err.message));
   };
 
   if (loading) return <div>Loading courses...</div>;
-  if (error) return <div className="error-message">{error}</div>;  // Styled error handling
+  if (error) {
+    console.error("Error state:", error);  // Log error to console
+    return null;  // Don’t display error on UI
+  }
+
+  console.log("Rendering courses, count:", courses.length);  // Debug: Confirm render count
 
   return (
     <div className="courses-container">
@@ -186,7 +190,7 @@ const Courses = () => {
           <li key={course.id} className="course-card">
             <img src={course.image || "/images/default.png"} alt={course.name} className="course-image" />
             <h3 className="course-title">{course.name}</h3>
-            <p className="course-duration">Duration: {course.duration} hours</p>  // Added duration display
+            <p className="course-duration">Duration: {course.duration} hours</p>
             <button className="view-course-btn">
               <Link to={`/course/${course.id}`}>View Course</Link>
             </button>

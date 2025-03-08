@@ -3,7 +3,7 @@
   flex-direction: column;
   align-items: center;
   padding: 20px;
-  background: linear-gradient(rgb(245, 246, 253),rgb(154, 195, 248));
+  background: linear-gradient(rgb(245, 246, 253), rgb(154, 195, 248));
 }
 
 .title {
@@ -25,7 +25,7 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  background-color:rgb(232, 242, 253);
+  background-color: rgb(232, 242, 253);
   border: 1px solid #ddd;
   padding: 20px;
   border-radius: 10px;
@@ -47,8 +47,8 @@
   object-fit: contain;
   border-radius: 8px;
   margin-bottom: 10px;
-  
 }
+
 .course-duration {
   font-size: 0.9em;
   color: #666;
@@ -80,9 +80,9 @@ button {
 .add-course-btn {
   background-color: #28a745;
   color: white;
-  margin-bottom:50px;
-  font-weight:bold; 
-  font-size:25px;
+  margin-bottom: 50px;
+  font-weight: bold;
+  font-size: 25px;
 }
 
 .add-course-btn:hover {
@@ -116,17 +116,27 @@ button {
   background-color: #c82333;
 }
 
+.error-message { 
+  color: #d32f2f;
+  background-color: #ffebee;
+  padding: 10px;
+  border-radius: 5px;
+  text-align: center;
+  margin: 20px;
+}
+
 /* Responsive Design */
 @media screen and (max-width: 768px) {
   .course-list {
-      flex-direction: column;
-      align-items: center;
+    flex-direction: column;
+    align-items: center;
   }
 
   .course-card {
-      width: 90%;
+    width: 90%;
   }
 }
+
 .edit-course-modal {
   position: fixed;
   top: 50%;
@@ -137,11 +147,14 @@ button {
   border: 1px solid #ccc;
   z-index: 1000;
 }
-.edit-course-modal input, .edit-course-modal select {
+
+.edit-course-modal input,
+.edit-course-modal select {
   display: block;
   margin: 10px 0;
   width: 100%;
 }
+
 .enroll-btn {
   margin-left: 10px;
   padding: 5px 10px;
@@ -151,6 +164,7 @@ button {
   border-radius: 4px;
   cursor: pointer;
 }
+
 .enroll-btn:hover {
   background-color: #218838;
 }
