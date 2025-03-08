@@ -4,6 +4,7 @@ import "./MyCourses.css";
 
 const MyCourses = () => {
   const [courses, setCourses] = useState([]);
+  const [instructors, setInstructors] = useState([]); // New state for instructors
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [newCourse, setNewCourse] = useState({ name: "", duration: "" });
@@ -12,7 +13,6 @@ const MyCourses = () => {
   const user = JSON.parse(localStorage.getItem("user"));
 
   useEffect(() => {
-    // Allow admin, instructor, or student roles
     if (!user || (user.role !== "admin" && user.role !== "instructor" && user.role !== "student")) {
       console.log("Redirecting to /: User is not admin, instructor, or student", user);
       setError("Please log in as an admin, instructor, or student to view courses.");
@@ -35,6 +35,7 @@ const MyCourses = () => {
         ? "https://group12-backend-cv2o.onrender.com/api/instructors/my-courses"
         : "https://group12-backend-cv2o.onrender.com/api/students/my-courses";
 
+    // Fetch courses
     fetch(endpoint, {
       headers: { "Authorization": `Bearer ${token}` },
     })
@@ -51,6 +52,22 @@ const MyCourses = () => {
         setError(`Failed to load courses: ${err.message}`);
         setLoading(false);
       });
+
+    // Fetch instructors (for admin only)
+    if (user.role === "admin") {
+      fetch("https://group12-backend-cv2o.onrender.com/api/instructors", {
+        headers: { "Authorization": `Bearer ${token}` },
+      })
+        .then((res) => {
+          if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+          return res.json();
+        })
+        .then((data) => {
+          console.log("Fetched instructors:", data);
+          setInstructors(Array.isArray(data) ? data : []);
+        })
+        .catch((err) => console.error("Fetch instructors error:", err.message));
+    }
   }, [navigate, user]);
 
   const handleCreateCourse = () => {
@@ -58,7 +75,7 @@ const MyCourses = () => {
     const endpoint =
       user.role === "admin"
         ? "https://group12-backend-cv2o.onrender.com/api/admin/courses"
-        : "https://group12-backend-cv2o.onrender.com/api/instructors/courses"; // Note: Instructor POST not defined yet
+        : "https://group12-backend-cv2o.onrender.com/api/instructors/courses";
     fetch(endpoint, {
       method: "POST",
       headers: {
@@ -187,6 +204,24 @@ const MyCourses = () => {
                           setEditingCourse({ ...editingCourse, duration: e.target.value })
                         }
                       />
+                      {user.role === "admin" && (
+                        <select
+                          value={editingCourse.instructor_id || ""}
+                          onChange={(e) =>
+                            setEditingCourse({
+                              ...editingCourse,
+                              instructor_id: e.target.value ? parseInt(e.target.value) : null,
+                            })
+                          }
+                        >
+                          <option value="">No Instructor</option>
+                          {instructors.map((instructor) => (
+                            <option key={instructor.id} value={instructor.id}>
+                              {instructor.username}
+                            </option>
+                          ))}
+                        </select>
+                      )}
                     </>
                   ) : (
                     <div className="course-info-wrapper">
