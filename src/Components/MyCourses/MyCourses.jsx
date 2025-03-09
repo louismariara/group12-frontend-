@@ -10,7 +10,7 @@ const MyCourses = () => {
   const [newCourse, setNewCourse] = useState({ name: "", duration: "" });
   const [editingCourse, setEditingCourse] = useState(null);
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem("user"));
+  const user = JSON.parse(localStorage.getItem("user") || "{}"); // Default to empty object if null
 
   useEffect(() => {
     if (!user || (user.role !== "admin" && user.role !== "instructor" && user.role !== "student")) {
@@ -20,9 +20,10 @@ const MyCourses = () => {
       return;
     }
 
-    const token = localStorage.getItem("token");
+    const token = typeof window !== "undefined" && window.localStorage ? localStorage.getItem("token") : null;
     if (!token) {
       console.error("No token found. Please log in again.");
+      setError("No token found. Please log in again.");
       setLoading(false);
       return;
     }
@@ -46,12 +47,13 @@ const MyCourses = () => {
         setLoading(false);
       })
       .catch((err) => {
-        console.error("Fetch error:", err);
+        console.error("Fetch error:", err.message);
+        setError(err.message);
         setLoading(false);
       });
 
     if (user.role === "admin") {
-      fetch("https://group12-backend-cv2o.onrender.com/api/instructors", {
+      fetch("https://group12-backend-cv2o.onrender.com/api/admin/instructors", {
         headers: { "Authorization": `Bearer ${token}` },
       })
         .then((res) => {
@@ -61,13 +63,21 @@ const MyCourses = () => {
         .then((data) => {
           console.log("Fetched instructors:", data);
           setInstructors(Array.isArray(data) ? data : []);
+          if (typeof window !== "undefined" && window.localStorage) {
+            localStorage.setItem("instructors", JSON.stringify(data)); // Optional: Store if needed
+          }
         })
-        .catch((err) => console.error("Fetch instructors error:", err.message));
+        .catch((err) => {
+          console.error("Fetch instructors error:", err.message);
+          setError(err.message);
+        });
     }
   }, [navigate, user]);
 
   const handleCreateCourse = () => {
-    const token = localStorage.getItem("token");
+    const token = typeof window !== "undefined" && window.localStorage ? localStorage.getItem("token") : null;
+    if (!token) return;
+
     const endpoint =
       user.role === "admin"
         ? "https://group12-backend-cv2o.onrender.com/api/admin/courses"
@@ -92,7 +102,9 @@ const MyCourses = () => {
   };
 
   const handleUpdateCourse = (course) => {
-    const token = localStorage.getItem("token");
+    const token = typeof window !== "undefined" && window.localStorage ? localStorage.getItem("token") : null;
+    if (!token) return;
+
     const endpoint =
       user.role === "admin"
         ? `https://group12-backend-cv2o.onrender.com/api/admin/courses/${course.id}`
@@ -117,7 +129,9 @@ const MyCourses = () => {
   };
 
   const handleDeleteCourse = (courseId) => {
-    const token = localStorage.getItem("token");
+    const token = typeof window !== "undefined" && window.localStorage ? localStorage.getItem("token") : null;
+    if (!token) return;
+
     const endpoint =
       user.role === "admin"
         ? `https://group12-backend-cv2o.onrender.com/api/admin/courses/${courseId}`
@@ -139,7 +153,7 @@ const MyCourses = () => {
   if (loading) return <div>Loading courses...</div>;
   if (error) {
     console.error("Error state:", error);
-    return null;
+    return <div>Error: {error}</div>; // Display error to user
   }
 
   const isEditable = user.role === "admin" || user.role === "instructor";
@@ -180,7 +194,7 @@ const MyCourses = () => {
               <th>Course Name</th>
               {user.role === "instructor" && <th>Students</th>}
               <th>Published On</th>
-              {user.role === "admin" && <th>Instructor</th>} {/* New column */}
+              {user.role === "admin" && <th>Instructor</th>}
               {isEditable && <th>Actions</th>}
             </tr>
           </thead>
