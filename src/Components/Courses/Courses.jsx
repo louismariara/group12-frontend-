@@ -201,18 +201,20 @@ const Courses = () => {
           <li key={course.id} className="course-card">
             {console.log("Course image during render:", course.image)}
             <img
-              src={course.image || "/images/default.jpg"}
+              src={course.image || "/images/default.png"}
               alt={course.name}
               className="course-image"
               width="300"
               height="180"
               onError={(e) => {
                 console.error(`Failed to load image for ${course.name}: ${e.target.src}`);
-                e.target.src = "/images/default.jpg"; // First fallback changed to default.jpg
-                e.target.onerror = null; // Prevent infinite loop
-                if (e.target.src !== "/images/default.jpg") {
-                  e.target.src = "https://via.placeholder.com/300x180?text=No+Image"; // Full URL
-                }
+                console.log(`Attempting first fallback for ${course.name}: /images/default.png`);
+                e.target.src = "/images/default.png";
+                e.target.onerror = () => {
+                  console.log(`First fallback failed for ${course.name}, attempting course-related fallback: https://images.pexels.com/photos/11035380/pexels-photo-11035380.jpeg?auto=compress&cs=tinysrgb&w=300&h=180&dpr=1`);
+                  e.target.src = "https://images.pexels.com/photos/11035380/pexels-photo-11035380.jpeg?auto=compress&cs=tinysrgb&w=300&h=180&dpr=1";
+                  e.target.onerror = null; // Prevent infinite loop
+                };
               }}
             />
             <h3 className="course-title">{course.name}</h3>
