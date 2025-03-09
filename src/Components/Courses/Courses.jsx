@@ -201,20 +201,23 @@ const Courses = () => {
           <li key={course.id} className="course-card">
             {console.log("Course image during render:", course.image)}
             <img
-              src={course.image || "/images/default.jpg"}
+              src={course.image || "/images/default.png"}
               alt={course.name}
               className="course-image"
+              width="300" // Explicit width to match CSS
+              height="180" // Explicit height to match CSS
               onError={(e) => {
                 console.error(`Failed to load image for ${course.name}: ${e.target.src}`);
-                e.target.src = "/images/default.jpg";
-                e.target.onerror = () => {
-                  e.target.src = "https://via.placeholder.com/150?text=No+Image";
-                };
+                e.target.src = "/images/default.png"; // Use default.png
+                e.target.onerror = null; // Prevent infinite loop
+                if (e.target.src !== "/images/default.png") {
+                  e.target.src = "https://via.placeholder.com/300x180?text=No+Image";
+                }
               }}
             />
             <h3 className="course-title">{course.name}</h3>
             <p className="course-duration">Duration: {course.duration} hours</p>
-            <div className="button-group"> {/* Wrap buttons for better control */}
+            <div className="button-group">
               <button className="view-course-btn">
                 <Link to={`/course/${course.id}`}>View Course</Link>
               </button>
