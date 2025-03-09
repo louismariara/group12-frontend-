@@ -10,16 +10,10 @@ const MyCourses = () => {
   const [newCourse, setNewCourse] = useState({ name: "", duration: "" });
   const [editingCourse, setEditingCourse] = useState(null);
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem("user") || "{}"); // Default to empty object if null
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const BASE_URL = "https://group12-backend-cv2o.onrender.com";
 
-  useEffect(() => {
-    if (!user || (user.role !== "admin" && user.role !== "instructor" && user.role !== "student")) {
-      console.log("Redirecting to /: User is not admin, instructor, or student", user);
-      setLoading(false);
-      navigate("/");
-      return;
-    }
-
+  const fetchCourses = () => {
     const token = typeof window !== "undefined" && window.localStorage ? localStorage.getItem("token") : null;
     if (!token) {
       console.error("No token found. Please log in again.");
@@ -30,10 +24,10 @@ const MyCourses = () => {
 
     const endpoint =
       user.role === "admin"
-        ? "https://group12-backend-cv2o.onrender.com/api/admin/courses"
+        ? `${BASE_URL}/api/admin/courses`
         : user.role === "instructor"
-        ? "https://group12-backend-cv2o.onrender.com/api/instructors/my-courses"
-        : "https://group12-backend-cv2o.onrender.com/api/students/my-courses";
+        ? `${BASE_URL}/api/instructors/my-courses`
+        : `${BASE_URL}/api/students/my-courses`;
 
     fetch(endpoint, {
       headers: { "Authorization": `Bearer ${token}` },
@@ -51,10 +45,21 @@ const MyCourses = () => {
         setError(err.message);
         setLoading(false);
       });
+  };
+
+  useEffect(() => {
+    if (!user || (user.role !== "admin" && user.role !== "instructor" && user.role !== "student")) {
+      console.log("Redirecting to /: User is not admin, instructor, or student", user);
+      setLoading(false);
+      navigate("/");
+      return;
+    }
+
+    fetchCourses();
 
     if (user.role === "admin") {
-      fetch("https://group12-backend-cv2o.onrender.com/api/admin/instructors", {
-        headers: { "Authorization": `Bearer ${token}` },
+      fetch(`${BASE_URL}/api/admin/instructors`, {
+        headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` },
       })
         .then((res) => {
           if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
@@ -64,7 +69,7 @@ const MyCourses = () => {
           console.log("Fetched instructors:", data);
           setInstructors(Array.isArray(data) ? data : []);
           if (typeof window !== "undefined" && window.localStorage) {
-            localStorage.setItem("instructors", JSON.stringify(data)); // Optional: Store if needed
+            localStorage.setItem("instructors", JSON.stringify(data));
           }
         })
         .catch((err) => {
@@ -80,8 +85,8 @@ const MyCourses = () => {
 
     const endpoint =
       user.role === "admin"
-        ? "https://group12-backend-cv2o.onrender.com/api/admin/courses"
-        : "https://group12-backend-cv2o.onrender.com/api/instructors/courses";
+        ? `${BASE_URL}/api/admin/courses`
+        : `${BASE_URL}/api/instructors/courses`;
     fetch(endpoint, {
       method: "POST",
       headers: {
@@ -107,8 +112,8 @@ const MyCourses = () => {
 
     const endpoint =
       user.role === "admin"
-        ? `https://group12-backend-cv2o.onrender.com/api/admin/courses/${course.id}`
-        : `https://group12-backend-cv2o.onrender.com/api/instructors/courses/${course.id}`;
+        ? `${BASE_URL}/api/admin/courses/${course.id}`
+        : `${BASE_URL}/api/instructors/courses/${course.id}`;
     fetch(endpoint, {
       method: "PUT",
       headers: {
@@ -134,8 +139,8 @@ const MyCourses = () => {
 
     const endpoint =
       user.role === "admin"
-        ? `https://group12-backend-cv2o.onrender.com/api/admin/courses/${courseId}`
-        : `https://group12-backend-cv2o.onrender.com/api/instructors/courses/${courseId}`;
+        ? `${BASE_URL}/api/admin/courses/${courseId}`
+        : `${BASE_URL}/api/instructors/courses/${courseId}`;
     fetch(endpoint, {
       method: "DELETE",
       headers: { "Authorization": `Bearer ${token}` },
@@ -153,7 +158,7 @@ const MyCourses = () => {
   if (loading) return <div>Loading courses...</div>;
   if (error) {
     console.error("Error state:", error);
-    return <div>Error: {error}</div>; // Display error to user
+    return <div>Error: {error}</div>;
   }
 
   const isEditable = user.role === "admin" || user.role === "instructor";
@@ -167,7 +172,11 @@ const MyCourses = () => {
           ? "My Courses (Teaching)"
           : "My Enrolled Courses"}
       </h2>
-
+      {user.role === "instructor" && (
+        <button onClick={fetchCourses} className="refresh-btn">
+          Refresh Student Count
+        </button>
+      )}
       {isEditable && (
         <div className="course-form">
           <h4>Add New Course</h4>
@@ -240,10 +249,20 @@ const MyCourses = () => {
                   ) : (
                     <div className="course-info-wrapper">
                       <img
-                        src={course.image || "/images/default.png"}
+                        src={
+                          course.image
+                            ? `${BASE_URL}${course.image.startsWith('/') ? '' : '/'}${course.image}`
+                            : "/images/default.jpg"
+                        }
                         alt={course.name}
                         className="my-course-image"
-                        onError={(e) => (e.target.src = "/images/default.png")}
+                        onError={(e) => {
+                          console.error(`Failed to load image for ${course.name}: ${e.target.src}`);
+                          e.target.src = "/images/default.jpg";
+                          e.target.onerror = () => {
+                            e.target.src = "https://via.placeholder.com/150?text=No+Image";
+                          };
+                        }}
                       />
                       <span>{course.name}</span>
                     </div>
