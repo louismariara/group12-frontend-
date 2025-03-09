@@ -201,17 +201,17 @@ const Courses = () => {
           <li key={course.id} className="course-card">
             {console.log("Course image during render:", course.image)}
             <img
-              src={course.image || "/images/default.png"}
+              src={course.image || "/images/default.jpg"}
               alt={course.name}
               className="course-image"
-              width="300" // Explicit width to match CSS
-              height="180" // Explicit height to match CSS
+              width="300"
+              height="180"
               onError={(e) => {
                 console.error(`Failed to load image for ${course.name}: ${e.target.src}`);
-                e.target.src = "/images/default.png"; // Use default.png
+                e.target.src = "/images/default.jpg"; // First fallback changed to default.jpg
                 e.target.onerror = null; // Prevent infinite loop
-                if (e.target.src !== "/images/default.png") {
-                  e.target.src = "https://via.placeholder.com/300x180?text=No+Image";
+                if (e.target.src !== "/images/default.jpg") {
+                  e.target.src = "https://via.placeholder.com/300x180?text=No+Image"; // Full URL
                 }
               }}
             />
