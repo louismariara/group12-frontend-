@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import './Courses.css';
 
 const Courses = () => {
-  const user = JSON.parse(localStorage.getItem("user"));
+  const [currentUser, setCurrentUser] = useState(() => JSON.parse(localStorage.getItem("user") || '{}'));
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -27,7 +27,7 @@ const Courses = () => {
         return res.json();
       })
       .then(data => {
-        console.log("Fetched courses:", data);
+        console.log("Fetched courses data:", data); // Log full response
         if (Array.isArray(data)) {
           console.log("Number of courses fetched:", data.length);
           setCourses(data);
@@ -41,6 +41,16 @@ const Courses = () => {
         console.error("Fetch error:", err.message);
         setLoading(false);
       });
+
+    const handleStorageChange = () => {
+      const newUser = JSON.parse(localStorage.getItem("user") || '{}');
+      console.log("Storage changed, new user:", newUser); // Debug storage update
+      setCurrentUser(newUser);
+    };
+    window.addEventListener("storage", handleStorageChange);
+    // Force initial check
+    handleStorageChange();
+    return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
   const handleEnroll = (courseId) => {
@@ -84,7 +94,7 @@ const Courses = () => {
 
   const saveEditedCourse = () => {
     const token = localStorage.getItem("token");
-    const endpoint = user.is_admin ? 
+    const endpoint = currentUser?.is_admin ? 
       `https://group12-backend-cv2o.onrender.com/api/admin/courses/${editingCourse.id}` : 
       `https://group12-backend-cv2o.onrender.com/api/instructors/courses/${editingCourse.id}`;
     fetch(endpoint, {
@@ -123,7 +133,7 @@ const Courses = () => {
       })
       .then(data => {
         setCourses([...courses, data]);
-        if (user?.is_instructor) {
+        if (currentUser?.is_instructor) {
           fetch("https://group12-backend-cv2o.onrender.com/api/instructors/assign-course", {
             method: "POST",
             headers: {
@@ -148,16 +158,17 @@ const Courses = () => {
 
   if (loading) return <div>Loading courses...</div>;
   if (error) {
-    console.error("Error state:", error);  // Log error to console
-    return null;  // Don’t display error on UI
+    console.error("Error state:", error);
+    return null;
   }
 
-  console.log("Rendering courses, count:", courses.length);  // Debug: Confirm render count
+  console.log("Rendering courses, count:", courses.length);
+  console.log("Current user during render:", currentUser);
 
   return (
     <div className="courses-container">
       <h1 className="title">Our Courses</h1>
-      {(user?.is_admin || user?.is_instructor) && (
+      {(currentUser?.is_admin || currentUser?.is_instructor) && (
         <button onClick={() => setShowAddForm(!showAddForm)}>
           {showAddForm ? "Cancel" : "Add New Course"}
         </button>
@@ -188,23 +199,37 @@ const Courses = () => {
       <ul className="course-list">
         {courses.map((course) => (
           <li key={course.id} className="course-card">
-            <img src={course.image || "/images/default.png"} alt={course.name} className="course-image" />
+            {console.log("Course image during render:", course.image)}
+            <img
+              src={course.image || "/images/default.jpg"}
+              alt={course.name}
+              className="course-image"
+              onError={(e) => {
+                console.error(`Failed to load image for ${course.name}: ${e.target.src}`);
+                e.target.src = "/images/default.jpg";
+                e.target.onerror = () => {
+                  e.target.src = "https://via.placeholder.com/150?text=No+Image";
+                };
+              }}
+            />
             <h3 className="course-title">{course.name}</h3>
             <p className="course-duration">Duration: {course.duration} hours</p>
-            <button className="view-course-btn">
-              <Link to={`/course/${course.id}`}>View Course</Link>
-            </button>
-            {user?.is_student && (
-              <button className="enroll-btn" onClick={() => handleEnroll(course.id)}>
-                Enroll
+            <div className="button-group"> {/* Wrap buttons for better control */}
+              <button className="view-course-btn">
+                <Link to={`/course/${course.id}`}>View Course</Link>
               </button>
-            )}
-            {user && (user.is_admin || (user.is_instructor && course.instructor_id === user.id)) && (
+              {currentUser?.role === "student" && (
+                <button className="enroll-btn" onClick={() => handleEnroll(course.id)}>
+                  Enroll
+                </button>
+              )}
+            </div>
+            {currentUser && (currentUser.is_admin || (currentUser.is_instructor && course.instructor_id === currentUser.id)) && (
               <button className="edit-course-btn" onClick={() => handleEditCourse(course)}>
                 Edit Course
               </button>
             )}
-            {user?.is_admin && (
+            {currentUser?.is_admin && (
               <button className="delete-course-btn" onClick={() => handleDeleteCourse(course.id)}>
                 Delete Course
               </button>
