@@ -6,7 +6,7 @@ const Signup = ({ setUser }) => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("student"); // Default to student
+  const [role, setRole] = useState("student"); 
   const navigate = useNavigate();
 
   const handleSignup = (e) => {

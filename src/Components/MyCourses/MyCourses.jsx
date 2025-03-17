@@ -9,7 +9,7 @@ const MyCourses = () => {
   const [error, setError] = useState(null);
   const [newCourse, setNewCourse] = useState({ name: "", duration: "" });
   const [editingCourse, setEditingCourse] = useState(null);
-  const [selectedFile, setSelectedFile] = useState(null); // New state for file upload
+  const [selectedFile, setSelectedFile] = useState(null); 
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const BASE_URL = "https://group12-backend-cv2o.onrender.com";
@@ -185,7 +185,7 @@ const MyCourses = () => {
       })
       .then((data) => {
         alert("File uploaded successfully!");
-        setSelectedFile(null); // Clear the selected file
+        setSelectedFile(null); 
       })
       .catch((err) => console.error("Error uploading file:", err.message));
   };

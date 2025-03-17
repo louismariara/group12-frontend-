@@ -4,7 +4,7 @@ import Home from "./Components/Home/Home";
 import Navbar from "./Components/Navbar/Navbar";
 import Login from "./Components/Login/Login";
 import Signup from "./Components/signup/Signup";
-import Grades from "./Components/Grades/Grades"; // Using your uploaded version
+import Grades from "./Components/Grades/Grades"; 
 import Courses from "./Components/Courses/Courses";
 import AdminPage from "./Components/AdminPage/AdminPage";
 import CourseDetails from "./Components/CourseDetails/CourseDetails";

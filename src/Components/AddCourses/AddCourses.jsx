@@ -47,7 +47,7 @@ const AddCourse = () => {
     const courseData = {
       name: title,
       duration: 4,
-      image: imageUrl || null,  // Use the URL instead of file
+      image: imageUrl || null,  
       modules: lectures.length > 0 ? [{ title: "Module 1", lectures }] : null
     };
 

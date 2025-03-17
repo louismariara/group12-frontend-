@@ -27,7 +27,7 @@ const Courses = () => {
         return res.json();
       })
       .then(data => {
-        console.log("Fetched courses data:", data); // Log full response
+        console.log("Fetched courses data:", data); 
         if (Array.isArray(data)) {
           console.log("Number of courses fetched:", data.length);
           setCourses(data);
@@ -44,11 +44,11 @@ const Courses = () => {
 
     const handleStorageChange = () => {
       const newUser = JSON.parse(localStorage.getItem("user") || '{}');
-      console.log("Storage changed, new user:", newUser); // Debug storage update
+      console.log("Storage changed, new user:", newUser); 
       setCurrentUser(newUser);
     };
     window.addEventListener("storage", handleStorageChange);
-    // Force initial check
+    
     handleStorageChange();
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
@@ -213,7 +213,7 @@ const Courses = () => {
                 e.target.onerror = () => {
                   console.log(`First fallback failed for ${course.name}, attempting course-related fallback: https://images.pexels.com/photos/11035380/pexels-photo-11035380.jpeg?auto=compress&cs=tinysrgb&w=300&h=180&dpr=1`);
                   e.target.src = "https://images.pexels.com/photos/11035380/pexels-photo-11035380.jpeg?auto=compress&cs=tinysrgb&w=300&h=180&dpr=1";
-                  e.target.onerror = null; // Prevent infinite loop
+                  e.target.onerror = null; 
                 };
               }}
             />

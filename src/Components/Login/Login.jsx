@@ -35,7 +35,7 @@ const Login = ({ setUser }) => {
       })
       .catch(err => {
         console.error("Login error:", err.message);
-        alert(err.message); // Show backend message like "Invalid credentials"
+        alert(err.message); 
       });
   };
 
