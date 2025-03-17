@@ -9,6 +9,7 @@ const MyCourses = () => {
   const [error, setError] = useState(null);
   const [newCourse, setNewCourse] = useState({ name: "", duration: "" });
   const [editingCourse, setEditingCourse] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null); // New state for file upload
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const BASE_URL = "https://group12-backend-cv2o.onrender.com";
@@ -155,6 +156,40 @@ const MyCourses = () => {
       .catch((err) => console.error("Error deleting course:", err.message));
   };
 
+  const handleFileUpload = (courseId) => {
+    if (!selectedFile) {
+      alert("Please select a file to upload.");
+      return;
+    }
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.error("No token found. Please log in again.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+    formData.append("courseId", courseId);
+
+    fetch(`${BASE_URL}/api/instructors/upload-course-material`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+      },
+      body: formData,
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+        return res.json();
+      })
+      .then((data) => {
+        alert("File uploaded successfully!");
+        setSelectedFile(null); // Clear the selected file
+      })
+      .catch((err) => console.error("Error uploading file:", err.message));
+  };
+
   if (loading) return <div>Loading courses...</div>;
   if (error) {
     console.error("Error state:", error);
@@ -298,6 +333,22 @@ const MyCourses = () => {
                         <button onClick={() => handleDeleteCourse(course.id)}>
                           Delete
                         </button>
+                        {user.role === "instructor" && (
+                          <>
+                            <input
+                              type="file"
+                              id={`file-upload-${course.id}`}
+                              style={{ display: "none" }}
+                              onChange={(e) => setSelectedFile(e.target.files[0])}
+                            />
+                            <button
+                              onClick={() => handleFileUpload(course.id)}
+                              onMouseEnter={() => document.getElementById(`file-upload-${course.id}`).click()}
+                            >
+                              Upload
+                            </button>
+                          </>
+                        )}
                       </>
                     )}
                   </td>
