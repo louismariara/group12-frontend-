@@ -39,37 +39,78 @@ const AddCourse = () => {
     setLectures(lectures.filter((_, i) => i !== index));
   };
 
-  const handleAddCourse = () => {
+  const handleAddCourse = async () => {
     if (!title) {
       alert("Please fill in course title!");
       return;
     }
-    const courseData = {
-      name: title,
-      duration: 4,
-      image: imageUrl || null,  
-      modules: lectures.length > 0 ? [{ title: "Module 1", lectures }] : null
-    };
+
+    const token = localStorage.getItem("token");
+    let uploadedImageUrl = null;
 
     
-    const token = localStorage.getItem("token");
-    fetch("https://group12-backend-cv2o.onrender.com/api/admin/courses", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
-      },
-      body: JSON.stringify(courseData)
-    })
-      .then(res => res.json())
-      .then(() => {
+    if (thumbnailFile) {
+      const formData = new FormData();
+      formData.append("image_file", thumbnailFile); 
+
+      try {
+        const uploadResponse = await fetch("https://group12-backend-cv2o.onrender.com/api/admin/courses", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${token}`, 
+          },
+          body: formData,
+        });
+
+        const uploadData = await uploadResponse.json();
+        if (uploadResponse.ok) {
+          uploadedImageUrl = uploadData.image; 
+          setImageUrl(uploadedImageUrl); 
+        } else {
+          console.error("Upload failed:", uploadData);
+          alert("Failed to upload thumbnail!");
+          return;
+        }
+      } catch (err) {
+        console.error("Error uploading thumbnail:", err);
+        alert("Error uploading thumbnail!");
+        return;
+      }
+    }
+
+ 
+    const courseData = {
+      name: title,
+      duration: 4, 
+      image: uploadedImageUrl || imageUrl || null, 
+      modules: lectures.length > 0 ? [{ title: "Module 1", lectures }] : null,
+    };
+
+    try {
+      const response = await fetch("https://group12-backend-cv2o.onrender.com/api/admin/courses", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify(courseData),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
         setShowSuccess(true);
         setTimeout(() => {
           setShowSuccess(false);
           navigate("/courses");
         }, 2000);
-      })
-      .catch(err => console.error("Error adding course:", err));
+      } else {
+        console.error("Error adding course:", data);
+        alert("Failed to add course!");
+      }
+    } catch (err) {
+      console.error("Error adding course:", err);
+      alert("Error adding course!");
+    }
   };
 
   return (
